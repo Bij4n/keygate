@@ -4,346 +4,366 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keygate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-card: #1a1a25;
-      --bg-card-hover: #22222f; --border: #2a2a3a; --text-primary: #e8e8f0;
-      --text-secondary: #8888a0; --text-muted: #5a5a70; --accent: #6366f1;
-      --accent-hover: #7577f5; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+      --bg: #09090b; --bg-raised: #111114; --bg-card: #18181b;
+      --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+      --text: #fafafa; --text-2: #a1a1aa; --text-3: #71717a;
+      --accent: #818cf8; --accent-2: #6366f1; --accent-bg: rgba(99,102,241,0.08); --accent-border: rgba(99,102,241,0.2);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.06); --green-border: rgba(52,211,153,0.15);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.06); --red-border: rgba(248,113,113,0.15);
+      --orange: #fb923c; --orange-bg: rgba(251,146,60,0.06);
+      --radius: 10px;
     }
-    body { background: var(--bg-primary); color: var(--text-primary); font-family: system-ui, -apple-system, sans-serif; }
-    input { font-family: inherit; }
-    button { font-family: inherit; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    input, select, textarea, button { font-family: inherit; }
+
+    /* Layout */
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--bg-raised); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 10px; z-index: 10; }
+    .logo { display: flex; align-items: center; gap: 8px; padding: 0 12px; margin-bottom: 28px; font-size: 17px; font-weight: 700; letter-spacing: -0.03em; cursor: pointer; }
+    .nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+    .nav a { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--text-3); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+    .nav a:hover { color: var(--text-2); background: rgba(255,255,255,0.03); }
+    .nav a.active { color: var(--text); background: rgba(255,255,255,0.05); font-weight: 500; }
+    .nav a .badge-count { margin-left: auto; font-size: 11px; background: var(--accent-bg); color: var(--accent); padding: 1px 7px; border-radius: 10px; font-weight: 600; }
+    .sidebar-footer { border-top: 1px solid var(--border); padding-top: 14px; }
+    .user-row { display: flex; align-items: center; gap: 9px; padding: 8px 12px; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-3); }
+    .btn-logout { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px; margin-left: auto; padding: 4px 8px; border-radius: 4px; }
+    .btn-logout:hover { color: var(--red); background: var(--red-bg); }
+
+    main { flex: 1; margin-left: 220px; padding: 28px 32px; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .page-header p { font-size: 14px; color: var(--text-2); }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
+    .stat { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+    .stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+
+    /* Cards */
+    .card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-header h2 { font-size: 14px; font-weight: 600; }
+    .card-body { padding: 18px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.15s; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+    .btn-primary { background: var(--accent-2); color: white; }
+    .btn-primary:hover { background: var(--accent); }
+    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red-border); }
+    .btn-danger:hover { background: var(--red-bg); }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 16px; color: var(--text-3); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+    tr:last-child td { border-bottom: none; }
+    th:last-child, td:last-child { text-align: right; }
+
+    /* Tags */
+    .tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+    .tag-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .tag-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+    .tag-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(251,146,60,0.15); }
+    .tag-gray { background: rgba(255,255,255,0.04); color: var(--text-3); border: 1px solid var(--border); }
+    .tag-accent { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+    .code-tag { font-family: 'SF Mono', monospace; font-size: 12px; padding: 2px 7px; border-radius: 4px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-2); }
+
+    /* Connections grid */
+    .conn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+    .conn-card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.15s; }
+    .conn-card:hover { border-color: var(--border-hover); }
+    .conn-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .conn-provider { display: flex; align-items: center; gap: 10px; }
+    .conn-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .conn-name { font-weight: 500; font-size: 14px; }
+    .conn-status { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+    .conn-scopes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .conn-actions { display: flex; gap: 6px; }
+    .conn-actions .btn { flex: 1; justify-content: center; }
+
+    /* Empty state */
+    .empty { padding: 48px; text-align: center; color: var(--text-3); }
+    .empty p:first-child { font-size: 14px; margin-bottom: 6px; color: var(--text-2); }
+
+    /* Modal */
+    .modal-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+    .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 18px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .modal-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: transparent; color: var(--text); font-size: 13px; font-weight: 500; }
+    .modal-item:hover { border-color: var(--accent-border); background: var(--accent-bg); }
+    .modal-icon { font-size: 18px; }
+
+    /* Forms */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 5px; font-weight: 500; }
+    .form-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
+    .form-input:focus { border-color: var(--accent-border); }
+    .form-select { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; outline: none; appearance: none; }
+
+    /* Trust bar */
+    .trust-bar { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .trust-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
     /* Login */
     .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .login-card { width: 100%; max-width: 400px; padding: 40px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; }
-    .login-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 32px; }
-    .login-logo span { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-    .login-title { font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 8px; }
-    .login-subtitle { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 24px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
-    .form-group input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 14px; outline: none; }
-    .form-group input:focus { border-color: var(--accent); }
-    .btn-primary { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--accent); color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-primary:disabled { opacity: 0.7; cursor: wait; }
-    .error-msg { padding: 10px 14px; border-radius: 8px; background: rgba(239,68,68,0.1); border: 1px solid var(--danger); color: var(--danger); font-size: 13px; margin-bottom: 16px; }
-    .switch-link { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
-    .switch-link button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; }
+    .login-card { width: 100%; max-width: 380px; padding: 36px; background: var(--bg-raised); border: 1px solid var(--border); border-radius: 14px; }
+    .login-logo { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 28px; font-size: 22px; font-weight: 700; }
+    .login-title { font-size: 17px; font-weight: 600; text-align: center; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: var(--text-2); text-align: center; margin-bottom: 22px; }
+    .error-msg { padding: 9px 12px; border-radius: 8px; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); font-size: 12px; margin-bottom: 14px; }
 
-    /* Dashboard layout */
-    .app { display: flex; min-height: 100vh; }
-    .sidebar { width: 240px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 12px; }
-    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 12px; margin-bottom: 32px; }
-    .sidebar-logo span { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
-    .nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-    .nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; text-decoration: none; font-size: 14px; color: var(--text-secondary); cursor: pointer; }
-    .nav a:hover { background: var(--bg-card); }
-    .nav a.active { color: var(--text-primary); background: var(--bg-card); font-weight: 500; }
-    .sidebar-footer { border-top: 1px solid var(--border); padding-top: 16px; display: flex; align-items: center; justify-content: space-between; padding: 16px 12px 0; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: white; }
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .user-name { font-size: 13px; font-weight: 500; }
-    .user-role { font-size: 11px; color: var(--text-muted); }
-    .btn-logout { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; }
-    .btn-logout:hover { color: var(--danger); }
-
-    main { flex: 1; margin-left: 240px; padding: 32px; }
-    h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
-    .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
-
-    /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
-    .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
-
-    /* Section */
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .section-title { font-size: 16px; font-weight: 500; }
-    .btn-connect { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; }
-    .btn-connect:hover { background: var(--accent-hover); }
-
-    /* Connections */
-    .connections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 40px; }
-    .connection-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: border-color 0.15s; }
-    .connection-card:hover { border-color: #4a4a6a; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-    .card-provider { display: flex; align-items: center; gap: 12px; }
-    .card-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .provider-name { font-weight: 500; font-size: 15px; }
-    .provider-status { font-size: 11px; display: flex; align-items: center; gap: 4px; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-    .scopes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
-    .scope-tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--bg-primary); color: var(--text-secondary); border: 1px solid var(--border); }
-    .card-actions { margin-top: 12px; display: flex; gap: 8px; }
-    .btn-manage { flex: 1; padding: 6px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); cursor: pointer; }
-    .btn-revoke { padding: 6px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--danger); background: transparent; color: var(--danger); cursor: pointer; }
-    .btn-revoke:hover { background: rgba(239,68,68,0.1); }
-
-    /* Activity */
-    .activity-table { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .activity-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .activity-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-    .activity-table th:last-child { text-align: right; }
-    .activity-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-    .activity-table td:last-child { text-align: right; color: var(--text-muted); }
-    .activity-table tr:last-child td { border-bottom: none; }
-    .agent-tag { font-family: monospace; font-size: 12px; padding: 2px 6px; border-radius: 4px; background: var(--bg-primary); border: 1px solid var(--border); }
-
-    .empty-state { padding: 40px; text-align: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; color: var(--text-muted); }
-
-    /* Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 480px; max-height: 80vh; overflow-y: auto; }
-    .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
-    .provider-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .provider-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-primary); font-size: 14px; }
-    .provider-item:hover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
-    .provider-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; font-size: 16px; }
-
-    /* Token modal */
-    .token-result { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 16px; }
-    .token-result pre { font-size: 12px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-all; }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      main { margin-left: 0; padding: 20px 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .conn-grid { grid-template-columns: 1fr; }
+      .modal-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-const API = '';
-const providerEmojis = { github: '🐙', gmail: '📧', slack: '💬', notion: '📝', google_drive: '📁', calendar: '📅', jira: '📋', salesforce: '☁️', hubspot: '👥', stripe: '💳', custom: '🔧' };
-const actionColors = { 'token.issued': 'var(--accent)', 'token.resolved': 'var(--success)', 'token.denied': 'var(--danger)', 'token.expired': 'var(--warning)', 'token.revoked': 'var(--text-muted)', 'tokens.revoked_all': 'var(--danger)' };
+const E = {github:'🐙',gmail:'📧',slack:'💬',notion:'📝',google_drive:'📁',calendar:'📅',jira:'📋',salesforce:'☁️',hubspot:'👥',stripe:'💳',custom:'🔧'};
+const AC = {'token.issued':'var(--accent)','token.resolved':'var(--green)','token.denied':'var(--red)','token.expired':'var(--orange)','token.revoked':'var(--text-3)','tokens.revoked_all':'var(--red)'};
+const PS = {github:['repo:read','read:user'],gmail:['gmail.readonly'],slack:['channels:read'],notion:['read_content'],google_drive:['drive.readonly'],calendar:['calendar.readonly'],jira:['read:jira-work'],salesforce:['api'],hubspot:['crm.objects.contacts.read'],stripe:['read_only']};
 
-let state = { token: localStorage.getItem('kg_token'), user: JSON.parse(localStorage.getItem('kg_user') || 'null'), view: 'dashboard', connections: [], audit: [], summary: null, showModal: null, showTokenModal: null, tokenResult: null };
+let S = {token:localStorage.getItem('kg_token'),user:JSON.parse(localStorage.getItem('kg_user')||'null'),page:'dashboard',connections:[],audit:[],summary:null,agents:[],policies:[],alerts:[],approvals:{approvals:[],stats:{}},modal:null,tokenResult:null};
 
-async function api(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(state.token ? { Authorization: `Bearer ${state.token}` } : {}) };
-  const res = await fetch(`${API}${path}`, { ...opts, headers: { ...headers, ...opts.headers } });
-  if (res.status === 401) {
-    state.token = null; state.user = null;
-    localStorage.removeItem('kg_token'); localStorage.removeItem('kg_user');
-    render();
-    throw new Error('Session expired');
-  }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
-  return data;
+async function api(p,o={}){
+  const h={'Content-Type':'application/json',...(S.token?{Authorization:`Bearer ${S.token}`}:{})};
+  const r=await fetch(p,{...o,headers:{...h,...o.headers}});
+  if(r.status===401){S.token=null;S.user=null;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();throw new Error('Session expired');}
+  const d=await r.json();if(!r.ok)throw new Error(d.error||d.message||'Failed');return d;
 }
+function ft(t){const d=Date.now()-new Date(t).getTime(),m=Math.floor(d/60000);if(m<1)return'now';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return new Date(t).toLocaleDateString();}
+function pn(p){return p.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 
-function formatTime(ts) {
-  const diff = Date.now() - new Date(ts).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now'; if (m < 60) return m + 'm ago';
-  const h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
-  return new Date(ts).toLocaleDateString();
-}
-
-async function loadDashboard() {
-  try {
-    const [conns, auditData, summaryData] = await Promise.all([
-      api('/api/connections'), api('/api/audit?limit=10'), api('/api/audit/summary')
+async function load(){
+  try{
+    const[c,a,s,ag,pol,al,ap]=await Promise.all([
+      api('/api/connections'),api('/api/audit?limit=50'),api('/api/audit/summary'),
+      api('/api/agents').catch(()=>({agents:[]})),api('/api/policies').catch(()=>({policies:[]})),
+      api('/api/alerts').catch(()=>({alerts:[],unacknowledged:0})),api('/api/approvals').catch(()=>({approvals:[],stats:{}}))
     ]);
-    state.connections = conns.connections;
-    state.audit = auditData.entries;
-    state.summary = summaryData;
-  } catch (e) { console.error(e); }
+    S.connections=c.connections;S.audit=a.entries;S.summary=s;S.agents=ag.agents;S.policies=pol.policies;S.alerts=al;S.approvals=ap;
+  }catch(e){console.error(e);}
   render();
 }
 
-async function handleLogin(email, password) {
-  const data = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-  state.token = data.token; state.user = data.user;
-  localStorage.setItem('kg_token', data.token);
-  localStorage.setItem('kg_user', JSON.stringify(data.user));
-  loadDashboard();
-}
+async function login(e,p){const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:e,password:p})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
+async function register(e,p,n){const d=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email:e,password:p,name:n||undefined})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
+function logout(){S.token=null;S.user=null;S.connections=[];S.audit=[];localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();}
+async function addConn(p){try{await api('/api/connections',{method:'POST',body:JSON.stringify({provider:p,scopes:PS[p]||['read']})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function delConn(id){if(!confirm('Revoke this connection?'))return;try{await api(`/api/connections/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function issueToken(cid){try{const r=await api('/api/tokens/issue',{method:'POST',body:JSON.stringify({connectionId:cid,agentId:'demo-agent',scopes:[{resource:'data',actions:['read']}],ttl:3600})});S.tokenResult=r;S.modal='token';render();await load();}catch(e){alert(e.message);}}
+async function revokeToken(tid){try{await api(`/api/tokens/${tid}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function registerAgent(name,desc){try{await api('/api/agents',{method:'POST',body:JSON.stringify({name,description:desc})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function suspendAgent(id){try{await api(`/api/agents/${id}/suspend`,{method:'POST'});await load();}catch(e){alert(e.message);}}
+async function activateAgent(id){try{await api(`/api/agents/${id}/activate`,{method:'POST'});await load();}catch(e){alert(e.message);}}
+async function createPolicy(name,effect,conditions){try{await api('/api/policies',{method:'POST',body:JSON.stringify({name,effect,conditions})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function deletePolicy(id){if(!confirm('Delete this policy?'))return;try{await api(`/api/policies/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function ackAlert(id){try{await api(`/api/alerts/${id}/acknowledge`,{method:'POST'});await load();}catch(e){alert(e.message);}}
+async function decideApproval(id,decision){try{await api(`/api/approvals/${id}/decide`,{method:'POST',body:JSON.stringify({decision})});await load();}catch(e){alert(e.message);}}
+async function genApiKey(name){try{const r=await api('/api/auth/api-keys',{method:'POST',body:JSON.stringify({name})});S.tokenResult={key:r.key,name:r.name,prefix:r.prefix};S.modal='apikey';render();}catch(e){alert(e.message);}}
 
-async function handleRegister(email, password, name) {
-  const data = await api('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password, name: name || undefined }) });
-  state.token = data.token; state.user = data.user;
-  localStorage.setItem('kg_token', data.token);
-  localStorage.setItem('kg_user', JSON.stringify(data.user));
-  loadDashboard();
-}
+function navItem(icon,label,page,badge){return`<a class="${S.page===page?'active':''}" onclick="S.page='${page}';render()">${icon} ${label}${badge?`<span class="badge-count">${badge}</span>`:''}</a>`;}
 
-function logout() {
-  state.token = null; state.user = null; state.connections = []; state.audit = []; state.summary = null;
-  localStorage.removeItem('kg_token'); localStorage.removeItem('kg_user');
-  render();
-}
-
-async function addConnection(provider) {
-  const providerScopes = { github: ['repo:read','read:user'], gmail: ['gmail.readonly'], slack: ['channels:read'], notion: ['read_content'], google_drive: ['drive.readonly'], calendar: ['calendar.readonly'], jira: ['read:jira-work'], salesforce: ['api'], hubspot: ['crm.objects.contacts.read'], stripe: ['read_only'] };
-  try {
-    await api('/api/connections', { method: 'POST', body: JSON.stringify({ provider, scopes: providerScopes[provider] || ['read'] }) });
-    state.showModal = null;
-    await loadDashboard();
-  } catch (e) { alert(e.message); }
-}
-
-async function revokeConnection(id) {
-  if (!confirm('Revoke this connection and all its tokens?')) return;
-  try { await api(`/api/connections/${id}`, { method: 'DELETE' }); await loadDashboard(); } catch (e) { alert(e.message); }
-}
-
-async function issueToken(connectionId) {
-  try {
-    const result = await api('/api/tokens/issue', { method: 'POST', body: JSON.stringify({ connectionId, agentId: 'demo-agent', scopes: [{ resource: 'data', actions: ['read'] }], ttl: 3600 }) });
-    state.tokenResult = result;
-    state.showTokenModal = connectionId;
-    render();
-    await loadDashboard();
-  } catch (e) { alert(e.message); }
-}
-
-function renderLogin() {
-  let isRegister = false;
-  const el = document.getElementById('app');
-  function draw() {
-    el.innerHTML = `
-      <div class="login-page"><div class="login-card">
-        <div class="login-logo">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Keygate</span>
-        </div>
-        <div class="login-title">${isRegister ? 'Create your account' : 'Welcome back'}</div>
-        <div class="login-subtitle">${isRegister ? 'Start securing your agent credentials' : 'Sign in to manage your connections'}</div>
-        <div id="login-error"></div>
-        <form id="auth-form">
-          ${isRegister ? '<div class="form-group"><label>Name</label><input type="text" id="name" placeholder="Your name"></div>' : ''}
-          <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="you@example.com" required></div>
-          <div class="form-group" style="margin-bottom:24px"><label>Password</label><input type="password" id="password" placeholder="Min. 8 characters" required minlength="8"></div>
-          <button type="submit" class="btn-primary" id="submit-btn">${isRegister ? 'Create Account' : 'Sign In'}</button>
-        </form>
-        <div class="switch-link">${isRegister ? 'Already have an account?' : "Don't have an account?"} <button id="switch-btn">${isRegister ? 'Sign in' : 'Create one'}</button></div>
-      </div></div>`;
-    document.getElementById('switch-btn').onclick = () => { isRegister = !isRegister; draw(); };
-    document.getElementById('auth-form').onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.disabled = true; btn.textContent = 'Please wait...';
-      try {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        if (isRegister) { const name = document.getElementById('name')?.value; await handleRegister(email, password, name); }
-        else { await handleLogin(email, password); }
-      } catch (err) {
-        document.getElementById('login-error').innerHTML = `<div class="error-msg">${err.message}</div>`;
-        btn.disabled = false; btn.textContent = isRegister ? 'Create Account' : 'Sign In';
-      }
-    };
+function renderLogin(){
+  let isReg=false;
+  const el=document.getElementById('app');
+  function draw(){
+    el.innerHTML=`<div class="login-page"><div class="login-card">
+      <div class="login-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
+      <div class="login-title">${isReg?'Create account':'Welcome back'}</div>
+      <div class="login-sub">${isReg?'Start securing your agent credentials':'Sign in to your dashboard'}</div>
+      <div id="err"></div>
+      <form id="af">${isReg?'<div class="form-group"><label class="form-label">Name</label><input class="form-input" type="text" id="fn" placeholder="Your name"></div>':''}
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="fe" placeholder="you@example.com" required></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="fp" placeholder="Min. 8 characters" required minlength="8"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-top:8px" id="sb">${isReg?'Create Account':'Sign In'}</button>
+      </form>
+      <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-3)">${isReg?'Have an account?':'No account?'} <button onclick="isReg=!isReg;draw()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px">${isReg?'Sign in':'Create one'}</button></div>
+    </div></div>`;
+    document.getElementById('af').onsubmit=async(ev)=>{ev.preventDefault();const b=document.getElementById('sb');b.disabled=true;b.textContent='Please wait...';try{if(isReg){await register(document.getElementById('fe').value,document.getElementById('fp').value,document.getElementById('fn')?.value);}else{await login(document.getElementById('fe').value,document.getElementById('fp').value);}}catch(e){document.getElementById('err').innerHTML=`<div class="error-msg">${e.message}</div>`;b.disabled=false;b.textContent=isReg?'Create Account':'Sign In';}};
   }
   draw();
 }
 
-function render() {
-  if (!state.token || !state.user) { renderLogin(); return; }
-  const s = state.summary || {};
-  const initials = (state.user.name || state.user.email || '??').slice(0,2).toUpperCase();
-
-  let connectionsHtml = '';
-  if (state.connections.length === 0) {
-    connectionsHtml = '<div class="empty-state"><p style="font-size:15px;margin-bottom:8px">No connections yet</p><p style="font-size:13px">Click "+ Connect Service" to get started</p></div>';
-  } else {
-    connectionsHtml = '<div class="connections-grid">' + state.connections.map(c => {
-      const emoji = providerEmojis[c.provider] || '🔧';
-      const name = c.provider.replace(/_/g,' ').replace(/\b\w/g,x=>x.toUpperCase());
-      const sc = c.status === 'active' ? 'var(--success)' : c.status === 'revoked' ? 'var(--danger)' : 'var(--text-muted)';
-      return `<div class="connection-card">
-        <div class="card-header"><div class="card-provider"><div class="card-icon">${emoji}</div><div><div class="provider-name">${name}</div><div class="provider-status" style="color:${sc}"><span class="status-dot" style="background:${sc}"></span>${c.status}</div></div></div></div>
-        <div class="scopes">${c.scopes.map(s=>`<span class="scope-tag">${s}</span>`).join('')}</div>
-        <div class="card-actions">
-          <button class="btn-manage" onclick="issueToken('${c.id}')">Issue Token</button>
-          <button class="btn-revoke" onclick="revokeConnection('${c.id}')">Revoke</button>
-        </div></div>`;
-    }).join('') + '</div>';
-  }
-
-  let auditHtml = '';
-  if (state.audit.length === 0) {
-    auditHtml = '<div class="empty-state"><p style="font-size:15px;margin-bottom:8px">No activity yet</p><p style="font-size:13px">Token events will appear here</p></div>';
-  } else {
-    auditHtml = `<div class="activity-table"><table><thead><tr><th>Event</th><th>Agent</th><th>Service</th><th>Status</th><th style="text-align:right">Time</th></tr></thead><tbody>
-    ${state.audit.map(e => {
-      const color = actionColors[e.action] || 'var(--text-secondary)';
-      return `<tr><td><span style="color:${color}">${e.action}</span></td><td><span class="agent-tag">${e.agentId}</span></td><td>${e.provider}</td><td><span style="color:${e.success?'var(--success)':'var(--danger)'}">${e.success?'success':'failed'}</span></td><td>${formatTime(e.timestamp)}</td></tr>`;
-    }).join('')}</tbody></table></div>`;
-  }
-
-  let modalHtml = '';
-  if (state.showModal === 'connect') {
-    const providers = ['github','gmail','slack','notion','google_drive','calendar','jira','salesforce','hubspot','stripe'];
-    modalHtml = `<div class="modal-overlay" onclick="if(event.target===this){state.showModal=null;render()}"><div class="modal">
-      <h3>Connect a Service</h3>
-      <div class="provider-list">${providers.map(p => {
-        const name = p.replace(/_/g,' ').replace(/\b\w/g,x=>x.toUpperCase());
-        return `<button class="provider-item" onclick="addConnection('${p}')"><div class="provider-icon">${providerEmojis[p]}</div>${name}</button>`;
-      }).join('')}</div>
-    </div></div>`;
-  }
-
-  if (state.showTokenModal) {
-    const r = state.tokenResult;
-    modalHtml = `<div class="modal-overlay" onclick="if(event.target===this){state.showTokenModal=null;state.tokenResult=null;render()}"><div class="modal">
-      <h3>Token Issued</h3>
-      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:16px">A scoped token has been issued for this connection.</p>
-      <div class="token-result"><pre>${JSON.stringify(r, null, 2)}</pre></div>
-      <p style="color:var(--text-muted);font-size:12px;margin-top:12px">This token expires at ${r?.expiresAt ? new Date(r.expiresAt).toLocaleTimeString() : 'N/A'}. Use the reference to resolve the actual access token.</p>
-    </div></div>`;
-  }
-
-  document.getElementById('app').innerHTML = `
-    <div class="app">
-      <aside class="sidebar">
-        <div class="sidebar-logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Keygate</span></div>
-        <nav class="nav">
-          <a class="active" onclick="">📊 Dashboard</a>
-          <a onclick="">🔗 Connections</a>
-          <a onclick="">🔑 Tokens</a>
-          <a onclick="">📜 Audit Log</a>
-          <a onclick="">👥 Team</a>
-          <a onclick="">⚙️ Settings</a>
-        </nav>
-        <div class="sidebar-footer">
-          <div class="user-info"><div class="avatar">${initials}</div><div><div class="user-name">${state.user.name || state.user.email}</div><div class="user-role">${state.user.role}</div></div></div>
-          <button class="btn-logout" onclick="logout()">Logout</button>
-        </div>
-      </aside>
-      <main>
-        <header><h1>Connections</h1><p class="subtitle">Manage service access for your AI agents</p></header>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-header"><span class="stat-label">Active Connections</span></div><div class="stat-value">${s.activeConnections||0}</div></div>
-          <div class="stat-card"><div class="stat-header"><span class="stat-label">Tokens Issued</span></div><div class="stat-value">${s.tokensIssued||0}</div></div>
-          <div class="stat-card"><div class="stat-header"><span class="stat-label">Events (24h)</span></div><div class="stat-value">${s.last24h?.requests||0}</div></div>
-          <div class="stat-card"><div class="stat-header"><span class="stat-label">Agents</span></div><div class="stat-value">${s.uniqueAgents||0}</div></div>
-        </div>
-        <div class="section-header"><h2 class="section-title">Active Connections</h2><button class="btn-connect" onclick="state.showModal='connect';render()">+ Connect Service</button></div>
-        ${connectionsHtml}
-        <h2 class="section-title" style="margin-bottom:16px">Recent Activity</h2>
-        ${auditHtml}
-      </main>
+function renderDashboard(){
+  const s=S.summary||{};
+  return`<div class="page-header"><h1>Dashboard</h1><p>Overview of your agent credential activity</p></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Connections</div><div class="stat-value">${s.activeConnections||0}</div></div>
+      <div class="stat"><div class="stat-label">Tokens Issued</div><div class="stat-value">${s.tokensIssued||0}</div></div>
+      <div class="stat"><div class="stat-label">Events (24h)</div><div class="stat-value">${s.last24h?.requests||0}</div></div>
+      <div class="stat"><div class="stat-label">Anomalies</div><div class="stat-value" style="color:${(s.anomalies||0)>0?'var(--red)':'inherit'}">${s.anomalies||0}</div></div>
     </div>
-    ${modalHtml}`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="card"><div class="card-header"><h2>Connections</h2><button class="btn btn-sm btn-primary" onclick="S.modal='connect';render()">+ Add</button></div>
+        ${S.connections.length===0?'<div class="empty"><p>No connections</p><p style="font-size:12px">Connect a service to get started</p></div>':'<table>'+S.connections.slice(0,5).map(c=>`<tr><td>${E[c.provider]||'🔧'} ${pn(c.provider)}</td><td><span class="tag tag-green">${c.status}</span></td><td>${c.scopes.length} scopes</td></tr>`).join('')+'</table>'}
+      </div>
+      <div class="card"><div class="card-header"><h2>Recent Activity</h2></div>
+        ${S.audit.length===0?'<div class="empty"><p>No activity yet</p></div>':'<table>'+S.audit.slice(0,5).map(e=>`<tr><td style="color:${AC[e.action]||'var(--text-2)'}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${ft(e.timestamp)}</td></tr>`).join('')+'</table>'}
+      </div>
+    </div>`;
 }
 
-// Init — wrap in DOMContentLoaded and add error recovery
-document.addEventListener('DOMContentLoaded', () => {
-  if (state.token) {
-    // Clear any stale data and show login immediately, then try to load
-    render();
-    loadDashboard().catch(() => {
-      state.token = null; state.user = null;
-      localStorage.removeItem('kg_token'); localStorage.removeItem('kg_user');
-      render();
-    });
-  } else {
-    render();
+function renderConnections(){
+  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Connections</h1><p>Manage OAuth connections to external services</p></div><button class="btn btn-primary" onclick="S.modal='connect';render()">+ Connect Service</button></div>
+    ${S.connections.length===0?'<div class="empty"><p>No connections yet</p><p style="font-size:12px">Click "+ Connect Service" to add your first connection</p></div>':
+    '<div class="conn-grid">'+S.connections.map(c=>{
+      const sc=c.status==='active'?'var(--green)':c.status==='revoked'?'var(--red)':'var(--text-3)';
+      return`<div class="conn-card"><div class="conn-top"><div class="conn-provider"><div class="conn-icon">${E[c.provider]||'🔧'}</div><div><div class="conn-name">${pn(c.provider)}</div><div class="conn-status" style="color:${sc}"><span class="dot" style="background:${sc}"></span>${c.status}</div></div></div></div>
+        <div class="conn-scopes">${c.scopes.map(s=>`<span class="tag tag-gray">${s}</span>`).join('')}</div>
+        <div class="conn-actions"><button class="btn btn-sm btn-ghost" onclick="issueToken('${c.id}')">Issue Token</button><button class="btn btn-sm btn-danger" onclick="delConn('${c.id}')">Revoke</button></div></div>`;
+    }).join('')+'</div>'}`;
+}
+
+function renderTokens(){
+  return`<div class="page-header"><h1>Tokens</h1><p>View and manage issued credential tokens</p></div>
+    <div class="card">${S.audit.filter(e=>e.action.startsWith('token.')).length===0?'<div class="empty"><p>No token activity</p><p style="font-size:12px">Issue a token from a connection to see it here</p></div>':
+    '<table><thead><tr><th>Event</th><th>Agent</th><th>Provider</th><th>Status</th><th>Time</th></tr></thead><tbody>'+
+    S.audit.filter(e=>e.action.startsWith('token.')).map(e=>{
+      const c=AC[e.action]||'var(--text-2)';
+      const tag=e.action.includes('issued')?'tag-accent':e.action.includes('revoked')?'tag-red':e.action.includes('denied')?'tag-red':e.action.includes('expired')?'tag-orange':'tag-gray';
+      return`<tr><td style="color:${c}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${e.provider}</td><td><span class="tag ${e.success?'tag-green':'tag-red'}">${e.success?'ok':'fail'}</span></td><td style="color:var(--text-3)">${ft(e.timestamp)}</td></tr>`;
+    }).join('')+'</tbody></table>'}</div>`;
+}
+
+function renderAudit(){
+  return`<div class="page-header"><h1>Audit Log</h1><p>Complete history of all credential access events</p></div>
+    <div class="card">${S.audit.length===0?'<div class="empty"><p>No audit entries</p></div>':
+    '<table><thead><tr><th>Event</th><th>Agent</th><th>Provider</th><th>Connection</th><th>Status</th><th>Time</th></tr></thead><tbody>'+
+    S.audit.map(e=>`<tr><td style="color:${AC[e.action]||'var(--text-2)'}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${e.provider}</td><td style="font-size:11px;color:var(--text-3)">${e.connectionId.slice(0,16)}...</td><td><span class="tag ${e.success?'tag-green':'tag-red'}">${e.success?'ok':'fail'}</span></td><td style="color:var(--text-3)">${ft(e.timestamp)}</td></tr>`).join('')+'</tbody></table>'}</div>`;
+}
+
+function renderAgents(){
+  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Agents</h1><p>Register and manage agent identities</p></div><button class="btn btn-primary" onclick="S.modal='agent';render()">+ Register Agent</button></div>
+    ${S.agents.length===0?'<div class="empty"><p>No agents registered</p><p style="font-size:12px">Register an agent to enforce identity-based access control</p></div>':
+    '<div class="card"><table><thead><tr><th>Agent</th><th>Status</th><th>Trust Score</th><th>Requests</th><th>Anomalies</th><th>Actions</th></tr></thead><tbody>'+
+    S.agents.map(a=>{
+      const tc=a.trustScore>=70?'var(--green)':a.trustScore>=40?'var(--orange)':'var(--red)';
+      const stag=a.status==='active'?'tag-green':a.status==='suspended'?'tag-orange':'tag-red';
+      return`<tr><td><strong>${a.name}</strong><br><span style="font-size:11px;color:var(--text-3)">${a.description||a.id}</span></td>
+        <td><span class="tag ${stag}">${a.status}</span></td>
+        <td><div style="display:flex;align-items:center;gap:8px"><span style="color:${tc};font-weight:600;font-size:12px">${Math.round(a.trustScore)}</span><div class="trust-bar" style="width:60px"><div class="trust-fill" style="width:${a.trustScore}%;background:${tc}"></div></div></div></td>
+        <td>${a.stats?.totalRequests||0}</td><td>${a.stats?.anomaliesDetected||0}</td>
+        <td>${a.status==='active'?`<button class="btn btn-sm btn-danger" onclick="suspendAgent('${a.id}')">Suspend</button>`:`<button class="btn btn-sm btn-ghost" onclick="activateAgent('${a.id}')">Activate</button>`}</td></tr>`;
+    }).join('')+'</tbody></table></div>'}`;
+}
+
+function renderPolicies(){
+  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Policies</h1><p>Define access control rules for your agents</p></div><button class="btn btn-primary" onclick="S.modal='policy';render()">+ Create Policy</button></div>
+    ${S.policies.length===0?'<div class="empty"><p>No policies defined</p><p style="font-size:12px">Create a policy to enforce access restrictions</p></div>':
+    '<div class="card"><table><thead><tr><th>Policy</th><th>Effect</th><th>Conditions</th><th>Actions</th></tr></thead><tbody>'+
+    S.policies.map(p=>{
+      const etag=p.effect==='deny'?'tag-red':p.effect==='require_approval'?'tag-orange':'tag-green';
+      return`<tr><td><strong>${p.name}</strong><br><span style="font-size:11px;color:var(--text-3)">${p.description||''}</span></td>
+        <td><span class="tag ${etag}">${p.effect}</span></td>
+        <td>${(p.conditions||[]).map(c=>`<span class="tag tag-gray">${c.type}</span>`).join(' ')}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deletePolicy('${p.id}')">Delete</button></td></tr>`;
+    }).join('')+'</tbody></table></div>'}`;
+}
+
+function renderSettings(){
+  return`<div class="page-header"><h1>Settings</h1><p>Manage your account and API keys</p></div>
+    <div style="display:grid;gap:10px">
+      <div class="card"><div class="card-header"><h2>Profile</h2></div><div class="card-body">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <div class="avatar" style="width:48px;height:48px;font-size:18px">${(S.user?.name||S.user?.email||'??').slice(0,2).toUpperCase()}</div>
+          <div><div style="font-weight:600">${S.user?.name||S.user?.email}</div><div style="font-size:13px;color:var(--text-3)">${S.user?.email}</div></div>
+        </div>
+        <div style="font-size:13px;color:var(--text-2)">Role: <span class="tag tag-accent">${S.user?.role||'member'}</span></div>
+      </div></div>
+      <div class="card"><div class="card-header"><h2>API Keys</h2><button class="btn btn-sm btn-primary" onclick="S.modal='genkey';render()">+ Generate Key</button></div><div class="card-body">
+        <p style="font-size:13px;color:var(--text-2)">API keys allow your agents and the SDK to authenticate with Keygate programmatically.</p>
+      </div></div>
+      <div class="card"><div class="card-header"><h2>Danger Zone</h2></div><div class="card-body">
+        <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+      </div></div>
+    </div>`;
+}
+
+function renderModal(){
+  if(!S.modal)return'';
+  if(S.modal==='connect'){
+    const provs=['github','gmail','slack','notion','google_drive','calendar','jira','salesforce','hubspot','stripe'];
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Connect a Service</h3><div class="modal-grid">${provs.map(p=>`<button class="modal-item" onclick="addConn('${p}')"><span class="modal-icon">${E[p]}</span>${pn(p)}</button>`).join('')}</div></div></div>`;
   }
-});
+  if(S.modal==='token'&&S.tokenResult){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;S.tokenResult=null;render()}"><div class="modal"><h3>Token Issued</h3><p style="font-size:13px;color:var(--text-2);margin-bottom:14px">A scoped token has been created.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px"><pre style="font-size:12px;color:var(--text-2);white-space:pre-wrap;word-break:break-all;margin:0">${JSON.stringify(S.tokenResult,null,2)}</pre></div><p style="font-size:11px;color:var(--text-3);margin-top:10px">Expires: ${S.tokenResult.expiresAt?new Date(S.tokenResult.expiresAt).toLocaleString():'N/A'}</p></div></div>`;
+  }
+  if(S.modal==='apikey'&&S.tokenResult){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;S.tokenResult=null;render()}"><div class="modal"><h3>API Key Created</h3><p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Copy this key now — it won't be shown again.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px"><code style="font-size:12px;color:var(--green);word-break:break-all">${S.tokenResult.key}</code></div></div></div>`;
+  }
+  if(S.modal==='agent'){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Register Agent</h3><form onsubmit="event.preventDefault();registerAgent(document.getElementById('an').value,document.getElementById('ad').value)">
+      <div class="form-group"><label class="form-label">Agent Name</label><input class="form-input" id="an" placeholder="e.g. coding-assistant" required></div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ad" placeholder="What does this agent do?"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Register Agent</button>
+    </form></div></div>`;
+  }
+  if(S.modal==='policy'){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Create Policy</h3><form onsubmit="event.preventDefault();const e=document.getElementById('pe').value;const conds=[];const ct=document.getElementById('pct').value;if(ct==='scope_action')conds.push({type:'scope_action',actions:[document.getElementById('pca').value]});if(ct==='provider')conds.push({type:'provider',providers:[document.getElementById('pcp').value]});createPolicy(document.getElementById('pn').value,e,conds)">
+      <div class="form-group"><label class="form-label">Policy Name</label><input class="form-input" id="pn" placeholder="e.g. No write access" required></div>
+      <div class="form-group"><label class="form-label">Effect</label><select class="form-select" id="pe"><option value="deny">Deny</option><option value="require_approval">Require Approval</option><option value="allow">Allow</option></select></div>
+      <div class="form-group"><label class="form-label">Condition Type</label><select class="form-select" id="pct"><option value="scope_action">Scope Action</option><option value="provider">Provider</option></select></div>
+      <div class="form-group"><label class="form-label">Value</label><input class="form-input" id="pca" placeholder="write, delete, or admin"><input class="form-input" id="pcp" placeholder="github, gmail, etc." style="margin-top:4px"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Create Policy</button>
+    </form></div></div>`;
+  }
+  if(S.modal==='genkey'){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Generate API Key</h3><form onsubmit="event.preventDefault();genApiKey(document.getElementById('kn').value)">
+      <div class="form-group"><label class="form-label">Key Name</label><input class="form-input" id="kn" placeholder="e.g. production-agent" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Generate</button>
+    </form></div></div>`;
+  }
+  return'';
+}
+
+function render(){
+  if(!S.token||!S.user){renderLogin();return;}
+  const alertCount=S.alerts?.unacknowledged||0;
+  const pendingCount=S.approvals?.stats?.pending||0;
+  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,settings:renderSettings};
+  const content=(pages[S.page]||renderDashboard)();
+  const initials=(S.user.name||S.user.email||'??').slice(0,2).toUpperCase();
+
+  document.getElementById('app').innerHTML=`<div class="app">
+    <aside class="sidebar">
+      <div class="logo" onclick="S.page='dashboard';render()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
+      <nav class="nav">
+        ${navItem('📊','Dashboard','dashboard')}
+        ${navItem('🔗','Connections','connections')}
+        ${navItem('🔑','Tokens','tokens')}
+        ${navItem('📜','Audit Log','audit')}
+        ${navItem('🤖','Agents','agents')}
+        ${navItem('📋','Policies','policies')}
+        ${navItem('⚙️','Settings','settings')}
+      </nav>
+      <div class="sidebar-footer"><div class="user-row"><div class="avatar">${initials}</div><div><div class="user-name">${S.user.name||S.user.email}</div><div class="user-role">${S.user.role}</div></div><button class="btn-logout" onclick="logout()">Out</button></div></div>
+    </aside>
+    <main>${content}</main>
+  </div>${renderModal()}`;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{if(S.token){render();load().catch(()=>{S.token=null;S.user=null;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();});}else{render();}});
 </script>
 </body>
 </html>
