@@ -143,7 +143,59 @@ const E = {github:'🐙',gmail:'📧',slack:'💬',notion:'📝',google_drive:'�
 const AC = {'token.issued':'var(--accent)','token.resolved':'var(--green)','token.denied':'var(--red)','token.expired':'var(--orange)','token.revoked':'var(--text-3)','tokens.revoked_all':'var(--red)'};
 const PS = {github:['repo:read','read:user'],gmail:['gmail.readonly'],slack:['channels:read'],notion:['read_content'],google_drive:['drive.readonly'],calendar:['calendar.readonly'],jira:['read:jira-work'],salesforce:['api'],hubspot:['crm.objects.contacts.read'],stripe:['read_only']};
 
-let S = {token:localStorage.getItem('kg_token'),user:JSON.parse(localStorage.getItem('kg_user')||'null'),page:'dashboard',connections:[],audit:[],summary:null,agents:[],policies:[],alerts:[],approvals:{approvals:[],stats:{}},modal:null,tokenResult:null};
+// Demo data — app works fully without login
+const DEMO = {
+  user: {id:'usr_demo',email:'demo@keygate.dev',name:'Demo User',role:'owner'},
+  connections: [
+    {id:'conn_demo_github',provider:'github',status:'active',scopes:['repo:read','read:user'],createdAt:'2026-03-24T10:00:00Z',updatedAt:'2026-03-24T10:00:00Z',lastUsedAt:'2026-03-25T19:42:00Z',metadata:{}},
+    {id:'conn_demo_gmail',provider:'gmail',status:'active',scopes:['gmail.readonly'],createdAt:'2026-03-24T10:05:00Z',updatedAt:'2026-03-24T10:05:00Z',lastUsedAt:'2026-03-25T19:30:00Z',metadata:{}},
+    {id:'conn_demo_slack',provider:'slack',status:'active',scopes:['channels:read','chat:write'],createdAt:'2026-03-24T10:10:00Z',updatedAt:'2026-03-24T10:10:00Z',lastUsedAt:'2026-03-25T18:15:00Z',metadata:{}},
+    {id:'conn_demo_notion',provider:'notion',status:'active',scopes:['read_content'],createdAt:'2026-03-24T10:15:00Z',updatedAt:'2026-03-24T10:15:00Z',lastUsedAt:'2026-03-25T17:45:00Z',metadata:{}},
+    {id:'conn_demo_calendar',provider:'calendar',status:'active',scopes:['calendar.readonly'],createdAt:'2026-03-24T10:20:00Z',updatedAt:'2026-03-24T10:20:00Z',lastUsedAt:'2026-03-25T19:00:00Z',metadata:{}},
+    {id:'conn_demo_drive',provider:'google_drive',status:'expired',scopes:['drive.readonly'],createdAt:'2026-03-20T10:00:00Z',updatedAt:'2026-03-23T10:00:00Z',lastUsedAt:'2026-03-22T14:00:00Z',metadata:{}},
+  ],
+  audit: [
+    {id:'aud_1',timestamp:'2026-03-25T19:42:00Z',action:'token.issued',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
+    {id:'aud_2',timestamp:'2026-03-25T19:40:00Z',action:'token.resolved',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
+    {id:'aud_3',timestamp:'2026-03-25T19:30:00Z',action:'token.issued',agentId:'email-summarizer',provider:'gmail',connectionId:'conn_demo_gmail',success:true,metadata:{}},
+    {id:'aud_4',timestamp:'2026-03-25T19:25:00Z',action:'token.denied',agentId:'unknown-bot',provider:'slack',connectionId:'conn_demo_slack',success:false,metadata:{}},
+    {id:'aud_5',timestamp:'2026-03-25T18:15:00Z',action:'token.resolved',agentId:'team-notifier',provider:'slack',connectionId:'conn_demo_slack',success:true,metadata:{}},
+    {id:'aud_6',timestamp:'2026-03-25T17:45:00Z',action:'token.issued',agentId:'research-agent',provider:'notion',connectionId:'conn_demo_notion',success:true,metadata:{}},
+    {id:'aud_7',timestamp:'2026-03-25T17:00:00Z',action:'token.expired',agentId:'research-agent',provider:'notion',connectionId:'conn_demo_notion',success:true,metadata:{}},
+    {id:'aud_8',timestamp:'2026-03-25T16:30:00Z',action:'token.revoked',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
+    {id:'aud_9',timestamp:'2026-03-25T15:00:00Z',action:'token.issued',agentId:'calendar-sync',provider:'calendar',connectionId:'conn_demo_calendar',success:true,metadata:{}},
+    {id:'aud_10',timestamp:'2026-03-25T14:00:00Z',action:'token.resolved',agentId:'calendar-sync',provider:'calendar',connectionId:'conn_demo_calendar',success:true,metadata:{}},
+  ],
+  summary: {activeConnections:5,tokensIssued:47,tokensRevoked:12,uniqueAgents:5,anomalies:1,last24h:{requests:23,uniqueAgents:4}},
+  agents: [
+    {id:'agent_1',name:'coding-assistant',description:'Code reviews and PR analysis',ownerId:'usr_demo',status:'active',trustScore:87,permissionBoundary:{allowedProviders:['github'],maxTokenTTL:3600,maxConcurrentTokens:5,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:34,totalTokensRevoked:8,totalRequests:142,failedRequests:2,anomaliesDetected:0},registeredAt:'2026-03-20T10:00:00Z',lastActiveAt:'2026-03-25T19:42:00Z'},
+    {id:'agent_2',name:'email-summarizer',description:'Summarizes daily inbox',ownerId:'usr_demo',status:'active',trustScore:72,permissionBoundary:{allowedProviders:['gmail'],maxTokenTTL:1800,maxConcurrentTokens:2,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:14,totalTokensRevoked:3,totalRequests:56,failedRequests:1,anomaliesDetected:0},registeredAt:'2026-03-21T09:00:00Z',lastActiveAt:'2026-03-25T19:30:00Z'},
+    {id:'agent_3',name:'research-agent',description:'Searches Notion knowledge base',ownerId:'usr_demo',status:'active',trustScore:65,permissionBoundary:{allowedProviders:['notion'],maxTokenTTL:3600,maxConcurrentTokens:3,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:8,totalTokensRevoked:2,totalRequests:31,failedRequests:0,anomaliesDetected:0},registeredAt:'2026-03-22T14:00:00Z',lastActiveAt:'2026-03-25T17:45:00Z'},
+    {id:'agent_4',name:'unknown-bot',description:'Unverified agent',ownerId:'usr_demo',status:'suspended',trustScore:15,permissionBoundary:{allowedProviders:[],maxTokenTTL:300,maxConcurrentTokens:1,allowedActions:['read'],requireApproval:true},stats:{totalTokensIssued:0,totalTokensRevoked:0,totalRequests:7,failedRequests:5,anomaliesDetected:3},registeredAt:'2026-03-25T19:20:00Z',lastActiveAt:'2026-03-25T19:25:00Z'},
+  ],
+  policies: [
+    {id:'pol_1',name:'No write access for agents',description:'Prevents any agent from modifying data without approval',effect:'deny',conditions:[{type:'scope_action',actions:['write','delete','admin']}],createdAt:'2026-03-20T10:00:00Z'},
+    {id:'pol_2',name:'Require approval for Slack',description:'All Slack access must be explicitly approved',effect:'require_approval',conditions:[{type:'provider',providers:['slack']}],createdAt:'2026-03-21T10:00:00Z'},
+    {id:'pol_3',name:'Max 1h token TTL',description:'No token can live longer than 1 hour',effect:'deny',conditions:[{type:'max_ttl',maxSeconds:3600}],createdAt:'2026-03-22T10:00:00Z'},
+  ],
+  alerts: {alerts:[{id:'alert_1',type:'anomaly',severity:'high',title:'Unknown Agent Detected',message:'Unregistered agent "unknown-bot" attempted credential access to Slack',agentId:'unknown-bot',acknowledged:false,createdAt:'2026-03-25T19:25:00Z'}],total:1,unacknowledged:1},
+};
+
+let S = {
+  token:localStorage.getItem('kg_token'),
+  user:JSON.parse(localStorage.getItem('kg_user')||'null') || DEMO.user,
+  page:'dashboard',
+  connections:DEMO.connections,
+  audit:DEMO.audit,
+  summary:DEMO.summary,
+  agents:DEMO.agents,
+  policies:DEMO.policies,
+  alerts:DEMO.alerts,
+  approvals:{approvals:[],stats:{pending:0,approved:0,denied:0,expired:0}},
+  modal:null,
+  tokenResult:null,
+  demoMode: !localStorage.getItem('kg_token'),
+};
 
 async function api(p,o={}){
   const h={'Content-Type':'application/json',...(S.token?{Authorization:`Bearer ${S.token}`}:{})};
@@ -168,19 +220,37 @@ async function load(){
 
 async function login(e,p){const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:e,password:p})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
 async function register(e,p,n){const d=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email:e,password:p,name:n||undefined})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
-function logout(){S.token=null;S.user=null;S.connections=[];S.audit=[];localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();}
-async function addConn(p){try{await api('/api/connections',{method:'POST',body:JSON.stringify({provider:p,scopes:PS[p]||['read']})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function delConn(id){if(!confirm('Revoke this connection?'))return;try{await api(`/api/connections/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function issueToken(cid){try{const r=await api('/api/tokens/issue',{method:'POST',body:JSON.stringify({connectionId:cid,agentId:'demo-agent',scopes:[{resource:'data',actions:['read']}],ttl:3600})});S.tokenResult=r;S.modal='token';render();await load();}catch(e){alert(e.message);}}
+function logout(){S.token=null;S.user=DEMO.user;S.connections=DEMO.connections;S.audit=DEMO.audit;S.summary=DEMO.summary;S.agents=DEMO.agents;S.policies=DEMO.policies;S.alerts=DEMO.alerts;S.demoMode=true;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();}
+async function addConn(p){
+  if(S.demoMode){S.connections.push({id:'conn_demo_'+p+'_'+Date.now(),provider:p,status:'active',scopes:PS[p]||['read'],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),lastUsedAt:null,metadata:{}});S.summary.activeConnections++;S.modal=null;render();return;}
+  try{await api('/api/connections',{method:'POST',body:JSON.stringify({provider:p,scopes:PS[p]||['read']})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function delConn(id){if(!confirm('Revoke this connection?'))return;
+  if(S.demoMode){S.connections=S.connections.filter(c=>c.id!==id);S.summary.activeConnections--;render();return;}
+  try{await api(`/api/connections/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function issueToken(cid){
+  if(S.demoMode){const c=S.connections.find(x=>x.id===cid);S.tokenResult={tokenId:'tok_'+Math.random().toString(36).slice(2,14),reference:'ref_'+Math.random().toString(36).slice(2,26),expiresAt:new Date(Date.now()+3600000).toISOString(),scopes:[{resource:'data',actions:['read']}]};S.audit.unshift({id:'aud_'+Date.now(),timestamp:new Date().toISOString(),action:'token.issued',agentId:'demo-agent',provider:c?.provider||'custom',connectionId:cid,success:true,metadata:{}});S.summary.tokensIssued++;S.modal='token';render();return;}
+  try{const r=await api('/api/tokens/issue',{method:'POST',body:JSON.stringify({connectionId:cid,agentId:'demo-agent',scopes:[{resource:'data',actions:['read']}],ttl:3600})});S.tokenResult=r;S.modal='token';render();await load();}catch(e){alert(e.message);}}
 async function revokeToken(tid){try{await api(`/api/tokens/${tid}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function registerAgent(name,desc){try{await api('/api/agents',{method:'POST',body:JSON.stringify({name,description:desc})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function suspendAgent(id){try{await api(`/api/agents/${id}/suspend`,{method:'POST'});await load();}catch(e){alert(e.message);}}
-async function activateAgent(id){try{await api(`/api/agents/${id}/activate`,{method:'POST'});await load();}catch(e){alert(e.message);}}
-async function createPolicy(name,effect,conditions){try{await api('/api/policies',{method:'POST',body:JSON.stringify({name,effect,conditions})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function deletePolicy(id){if(!confirm('Delete this policy?'))return;try{await api(`/api/policies/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function registerAgent(name,desc){
+  if(S.demoMode){S.agents.push({id:'agent_'+Date.now(),name,description:desc||'',ownerId:'usr_demo',status:'active',trustScore:50,permissionBoundary:{allowedProviders:[],maxTokenTTL:3600,maxConcurrentTokens:10,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:0,totalTokensRevoked:0,totalRequests:0,failedRequests:0,anomaliesDetected:0},registeredAt:new Date().toISOString()});S.modal=null;render();return;}
+  try{await api('/api/agents',{method:'POST',body:JSON.stringify({name,description:desc})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function suspendAgent(id){
+  if(S.demoMode){const a=S.agents.find(x=>x.id===id);if(a)a.status='suspended';render();return;}
+  try{await api(`/api/agents/${id}/suspend`,{method:'POST'});await load();}catch(e){alert(e.message);}}
+async function activateAgent(id){
+  if(S.demoMode){const a=S.agents.find(x=>x.id===id);if(a)a.status='active';render();return;}
+  try{await api(`/api/agents/${id}/activate`,{method:'POST'});await load();}catch(e){alert(e.message);}}
+async function createPolicy(name,effect,conditions){
+  if(S.demoMode){S.policies.push({id:'pol_'+Date.now(),name,description:'',effect,conditions,createdAt:new Date().toISOString()});S.modal=null;render();return;}
+  try{await api('/api/policies',{method:'POST',body:JSON.stringify({name,effect,conditions})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function deletePolicy(id){if(!confirm('Delete this policy?'))return;
+  if(S.demoMode){S.policies=S.policies.filter(p=>p.id!==id);render();return;}
+  try{await api(`/api/policies/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
 async function ackAlert(id){try{await api(`/api/alerts/${id}/acknowledge`,{method:'POST'});await load();}catch(e){alert(e.message);}}
 async function decideApproval(id,decision){try{await api(`/api/approvals/${id}/decide`,{method:'POST',body:JSON.stringify({decision})});await load();}catch(e){alert(e.message);}}
-async function genApiKey(name){try{const r=await api('/api/auth/api-keys',{method:'POST',body:JSON.stringify({name})});S.tokenResult={key:r.key,name:r.name,prefix:r.prefix};S.modal='apikey';render();}catch(e){alert(e.message);}}
+async function genApiKey(name){
+  if(S.demoMode){S.tokenResult={key:'kg_key_demo_'+Math.random().toString(36).slice(2,30),name,prefix:'kg_key_demo'};S.modal='apikey';render();return;}
+  try{const r=await api('/api/auth/api-keys',{method:'POST',body:JSON.stringify({name})});S.tokenResult={key:r.key,name:r.name,prefix:r.prefix};S.modal='apikey';render();}catch(e){alert(e.message);}}
 
 function navItem(icon,label,page,badge){return`<a class="${S.page===page?'active':''}" onclick="S.page='${page}';render()">${icon} ${label}${badge?`<span class="badge-count">${badge}</span>`:''}</a>`;}
 
@@ -338,7 +408,8 @@ function renderModal(){
 }
 
 function render(){
-  if(!S.token||!S.user){renderLogin();return;}
+  if(!S.token&&!S.demoMode){renderLogin();return;}
+  if(!S.user) S.user = DEMO.user;
   const alertCount=S.alerts?.unacknowledged||0;
   const pendingCount=S.approvals?.stats?.pending||0;
   const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,settings:renderSettings};
@@ -357,13 +428,18 @@ function render(){
         ${navItem('📋','Policies','policies')}
         ${navItem('⚙️','Settings','settings')}
       </nav>
+      ${S.demoMode?'<div style="padding:8px 12px;margin-bottom:8px"><div style="font-size:11px;color:var(--orange);background:var(--orange-bg);border:1px solid rgba(251,146,60,0.15);border-radius:6px;padding:6px 10px;text-align:center">Demo Mode</div></div>':''}
+      <div style="padding:4px 12px 8px"><a href="/docs.html" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);text-decoration:none">📖 Documentation</a></div>
       <div class="sidebar-footer"><div class="user-row"><div class="avatar">${initials}</div><div><div class="user-name">${S.user.name||S.user.email}</div><div class="user-role">${S.user.role}</div></div><button class="btn-logout" onclick="logout()">Out</button></div></div>
     </aside>
     <main>${content}</main>
   </div>${renderModal()}`;
 }
 
-document.addEventListener('DOMContentLoaded',()=>{if(S.token){render();load().catch(()=>{S.token=null;S.user=null;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();});}else{render();}});
+document.addEventListener('DOMContentLoaded',()=>{
+  render();
+  if(S.token&&!S.demoMode){load().catch(()=>{S.token=null;S.demoMode=true;S.user=DEMO.user;S.connections=DEMO.connections;S.audit=DEMO.audit;S.summary=DEMO.summary;render();});}
+});
 </script>
 </body>
 </html>
