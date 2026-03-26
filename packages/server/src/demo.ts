@@ -31,6 +31,7 @@ import { policiesRouter } from './routes/policies.js';
 import { approvalsRouter, approvalManager } from './routes/approvals.js';
 import { agentsRouter, agentRegistry } from './routes/agents.js';
 import { alertsRouter, addAlert, getUnacknowledgedCount } from './routes/alerts.js';
+import { webhooksRouter, webhookDispatcher } from './routes/webhooks.js';
 
 const JWT_SECRET = 'demo-jwt-secret-' + randomBytes(16).toString('hex');
 const ENCRYPTION_KEY = 'demo-encryption-key-' + randomBytes(16).toString('hex');
@@ -301,6 +302,7 @@ app.use('/api/policies', authenticate, policiesRouter);
 app.use('/api/approvals', authenticate, approvalsRouter);
 app.use('/api/agents', authenticate, agentsRouter);
 app.use('/api/alerts', authenticate, alertsRouter);
+app.use('/api/webhooks', authenticate, webhooksRouter);
 
 // Anomaly analysis hook — runs on every audit entry
 const originalAppendAudit = store.appendAuditLog.bind(store);
@@ -308,7 +310,7 @@ store.appendAuditLog = async function (entry: AuditEntry) {
   await originalAppendAudit(entry);
   const detections = anomalyEngine.analyze(entry);
   for (const d of detections) {
-    addAlert({
+    const alert = addAlert({
       type: 'anomaly',
       severity: d.severity,
       title: d.ruleName,
@@ -318,6 +320,13 @@ store.appendAuditLog = async function (entry: AuditEntry) {
       metadata: d.metadata,
     });
     agentRegistry.recordAnomaly(d.agentId);
+    // Dispatch webhook
+    webhookDispatcher.dispatch('anomaly.detected', {
+      event: 'anomaly.detected',
+      timestamp: new Date().toISOString(),
+      alert,
+      data: d.metadata,
+    }).catch(() => {});
   }
   agentRegistry.recordActivity(entry.agentId, entry.action, entry.success);
 };

@@ -38,6 +38,12 @@ export {
   type AgentPermissionBoundary,
   type AgentStats,
 } from './agents.js';
+export {
+  WebhookDispatcher,
+  type WebhookConfig,
+  type WebhookEvent,
+  type WebhookPayload,
+} from './webhooks.js';
 export type {
   Connection,
   ScopedToken,
