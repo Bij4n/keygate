@@ -11,6 +11,33 @@ export {
   type ProviderConfig,
   type ProviderScope,
 } from './providers.js';
+export {
+  AnomalyEngine,
+  DEFAULT_RULES,
+  type AnomalyRule,
+  type AnomalyDetection,
+  type Alert,
+  type AnomalyEngineConfig,
+} from './anomaly.js';
+export {
+  PolicyEngine,
+  type Policy,
+  type PolicyCondition,
+  type PolicyEvalContext,
+  type PolicyEvalResult,
+} from './policy.js';
+export {
+  ApprovalManager,
+  type ApprovalRequest,
+  type ApprovalDecision,
+} from './approvals.js';
+export {
+  AgentRegistry,
+  DEFAULT_PERMISSION_BOUNDARY,
+  type RegisteredAgent,
+  type AgentPermissionBoundary,
+  type AgentStats,
+} from './agents.js';
 export type {
   Connection,
   ScopedToken,

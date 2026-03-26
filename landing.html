@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keygate — Credential Broker for AI Agents</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-card: #1a1a25;
+      --border: #2a2a3a; --text-primary: #e8e8f0; --text-secondary: #8888a0;
+      --text-muted: #5a5a70; --accent: #6366f1; --accent-hover: #7577f5;
+      --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+    }
+    body { background: var(--bg-primary); color: var(--text-primary); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Nav */
+    .nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 48px; max-width: 1200px; margin: 0 auto; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; }
+    .nav-logo span { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a { color: var(--text-secondary); font-size: 14px; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text-primary); }
+    .btn-cta { background: var(--accent); color: white !important; border-radius: 8px; padding: 8px 20px; font-weight: 500; transition: background 0.15s; }
+    .btn-cta:hover { background: var(--accent-hover); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 80px 48px 60px; max-width: 800px; margin: 0 auto; }
+    .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); color: var(--accent); font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+    .hero h1 { font-size: 52px; font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px; }
+    .hero h1 .highlight { color: var(--accent); }
+    .hero p { font-size: 18px; color: var(--text-secondary); line-height: 1.6; max-width: 600px; margin: 0 auto 40px; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; }
+    .btn-hero { border-radius: 10px; padding: 14px 32px; font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; border: none; cursor: pointer; font-family: inherit; }
+    .btn-hero-primary { background: var(--accent); color: white; }
+    .btn-hero-primary:hover { background: var(--accent-hover); }
+    .btn-hero-secondary { background: transparent; color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-hero-secondary:hover { border-color: var(--text-muted); }
+
+    /* Diagram */
+    .diagram { max-width: 720px; margin: 0 auto 80px; padding: 0 48px; }
+    .diagram-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 36px; text-align: center; }
+    .diagram-box pre { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin: 0; white-space: pre; overflow-x: auto; }
+
+    /* Problem section */
+    .problem { max-width: 840px; margin: 0 auto 80px; padding: 0 48px; }
+    .problem h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .problem > p { font-size: 16px; color: var(--text-secondary); line-height: 1.6; max-width: 600px; margin: 0 auto 40px; text-align: center; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .comparison-card { border-radius: 12px; padding: 28px; }
+    .comparison-card.bad { background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); }
+    .comparison-card.good { background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); }
+    .comparison-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    .comparison-card.bad h3 { color: var(--danger); }
+    .comparison-card.good h3 { color: var(--success); }
+    .comparison-card ul { list-style: none; padding: 0; font-size: 14px; color: var(--text-secondary); }
+    .comparison-card li { padding: 6px 0; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+    .comparison-card.bad li::before { content: '✕'; color: var(--danger); font-weight: 600; flex-shrink: 0; }
+    .comparison-card.good li::before { content: '✓'; color: var(--success); font-weight: 600; flex-shrink: 0; }
+
+    /* Features */
+    .features { max-width: 1000px; margin: 0 auto 80px; padding: 0 48px; }
+    .features h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 48px; letter-spacing: -0.02em; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.15s; }
+    .feature-card:hover { border-color: #3a3a5a; }
+    .feature-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 20px; }
+    .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Code example */
+    .code-section { max-width: 800px; margin: 0 auto 80px; padding: 0 48px; }
+    .code-section h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .code-section > p { font-size: 16px; color: var(--text-secondary); text-align: center; margin-bottom: 32px; }
+    .code-block { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .code-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .code-tab { padding: 10px 20px; font-size: 13px; color: var(--text-muted); background: transparent; border: none; cursor: pointer; font-family: inherit; }
+    .code-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .code-block pre { padding: 24px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; color: var(--text-secondary); line-height: 1.7; overflow-x: auto; margin: 0; }
+    .code-block .kw { color: #c792ea; }
+    .code-block .fn { color: #82aaff; }
+    .code-block .str { color: #c3e88d; }
+    .code-block .cm { color: #546e7a; }
+
+    /* Integrations */
+    .integrations { max-width: 800px; margin: 0 auto 80px; padding: 0 48px; text-align: center; }
+    .integrations h2 { font-size: 32px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .integrations > p { font-size: 16px; color: var(--text-secondary); margin-bottom: 40px; }
+    .provider-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .provider-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .provider-icon { width: 60px; height: 60px; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 24px; transition: border-color 0.15s; }
+    .provider-icon:hover { border-color: var(--accent); }
+    .provider-name { font-size: 12px; color: var(--text-muted); }
+
+    /* CTA */
+    .cta { max-width: 800px; margin: 0 auto 80px; padding: 0 48px; }
+    .cta-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 56px; text-align: center; }
+    .cta-box h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+    .cta-box p { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; }
+
+    /* Footer */
+    .footer { border-top: 1px solid var(--border); padding: 32px 48px; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .footer-left { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--text-muted); font-size: 13px; }
+    .footer-links a:hover { color: var(--text-secondary); }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .comparison { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .nav { padding: 16px 24px; }
+      .hero, .problem, .features, .integrations, .cta, .code-section, .diagram { padding-left: 24px; padding-right: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Keygate</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#integrations">Integrations</a>
+      <a href="#code">SDK</a>
+      <a href="#feedback">Feedback</a>
+      <a href="/preview.html" class="btn-cta">Open Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge">Open Source Credential Broker for AI Agents</div>
+    <h1>Your agents need access.<br><span class="highlight">You need control.</span></h1>
+    <p>Keygate sits between your AI agents and the services they access — issuing scoped, short-lived tokens with full audit trails and instant revocation.</p>
+    <div class="hero-buttons">
+      <a href="/preview.html" class="btn-hero btn-hero-primary">Start for Free <span>→</span></a>
+      <a href="https://github.com" class="btn-hero btn-hero-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        View on GitHub
+      </a>
+    </div>
+  </section>
+
+  <!-- Diagram -->
+  <section class="diagram">
+    <div class="diagram-box">
+      <pre>
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Your Agent  │────▶│   Keygate    │────▶│   Services   │
+│              │     │   Broker     │     │              │
+│  Claude, GPT │◀────│  Scoped      │◀────│  Gmail, Slack│
+│  Custom, ... │     │  Tokens      │     │  GitHub, ... │
+└──────────────┘     └──────────────┘     └──────────────┘
+                           │
+                     ┌─────▼─────┐
+                     │ Dashboard │
+                     │ Audit Log │
+                     │ Controls  │
+                     └───────────┘</pre>
+    </div>
+  </section>
+
+  <!-- Problem / Solution -->
+  <section class="problem" id="how-it-works">
+    <h2>The problem with agent credentials today</h2>
+    <p>When you give an AI agent access to Gmail, GitHub, or Slack, you hand over a broad, persistent token. If any tool in the chain is compromised, the attacker gets everything.</p>
+    <div class="comparison">
+      <div class="comparison-card bad">
+        <h3>Without Keygate</h3>
+        <ul>
+          <li>Broad, persistent OAuth tokens shared across tools</li>
+          <li>Tokens visible in agent context window</li>
+          <li>No audit trail of credential usage</li>
+          <li>Revoking access means re-authenticating everything</li>
+          <li>One compromised tool = full account access</li>
+        </ul>
+      </div>
+      <div class="comparison-card good">
+        <h3>With Keygate</h3>
+        <ul>
+          <li>Scoped, short-lived tokens per agent per tool</li>
+          <li>Opaque references — agents never see real tokens</li>
+          <li>Every access logged with agent, action, and timestamp</li>
+          <li>One-click revocation, zero downtime</li>
+          <li>Compromised tool? That token already expired</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h2>Built for the agent era</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Scoped Tokens</h3>
+        <p>Issue short-lived, narrowly-scoped credentials per agent per tool. No more master keys floating in context windows.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚨</div>
+        <h3>Anomaly Detection</h3>
+        <p>Real-time behavioral analysis detects velocity spikes, off-hours access, scope escalation, and bulk data exfiltration attempts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Policy Engine</h3>
+        <p>Define conditional access rules — time restrictions, scope limits, provider controls. Deny or require approval based on your policies.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✋</div>
+        <h3>Human-in-the-Loop</h3>
+        <p>High-risk operations trigger approval requests. You approve or deny before the agent gets access — the best defense against prompt injection.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Agent Registration</h3>
+        <p>Every agent gets a verified identity, permission boundaries, and a trust score that builds over time. Unknown agents are flagged instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>One-Click Revocation</h3>
+        <p>Instantly kill any agent's access to any service. Suspected compromise? Revoke everything for a connection in one click.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👁️</div>
+        <h3>Full Audit Trail</h3>
+        <p>Every credential use is logged — agent, action, timestamp, resource. Exportable for SOC2/GDPR compliance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Opaque References</h3>
+        <p>Agents never see real tokens — they get opaque references resolved at execution time, preventing context window leaks.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Team Management</h3>
+        <p>Shared credential vaults with role-based access control. Set policies for which agents can access what across your organization.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Code Example -->
+  <section class="code-section" id="code">
+    <h2>Three lines to integrate</h2>
+    <p>Add Keygate to any agent with the SDK or MCP server.</p>
+    <div class="code-block">
+      <div class="code-tabs">
+        <button class="code-tab active">TypeScript SDK</button>
+        <button class="code-tab">MCP Config</button>
+      </div>
+      <pre>
+<span class="kw">import</span> { KeygateClient } <span class="kw">from</span> <span class="str">'@keygate/sdk'</span>;
+
+<span class="kw">const</span> kg = <span class="kw">new</span> <span class="fn">KeygateClient</span>({
+  apiKey: process.env.KEYGATE_API_KEY,
+  agentId: <span class="str">'my-agent'</span>,
+});
+
+<span class="cm">// Request a scoped, time-limited token</span>
+<span class="kw">const</span> { accessToken } = <span class="kw">await</span> kg.<span class="fn">getToken</span>(<span class="str">'conn_github'</span>, [
+  { resource: <span class="str">'repos'</span>, actions: [<span class="str">'read'</span>] }
+]);
+
+<span class="cm">// Use it — token auto-expires in 1 hour</span>
+<span class="kw">const</span> repos = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.github.com/user/repos'</span>, {
+  headers: { Authorization: <span class="str">`Bearer ${accessToken}`</span> },
+});</pre>
+    </div>
+  </section>
+
+  <!-- Integrations -->
+  <section class="integrations" id="integrations">
+    <h2>Works with your stack</h2>
+    <p>Connect any service your agents need. OAuth setup takes 30 seconds.</p>
+    <div class="provider-grid">
+      <div class="provider-item"><div class="provider-icon">🐙</div><div class="provider-name">GitHub</div></div>
+      <div class="provider-item"><div class="provider-icon">📧</div><div class="provider-name">Gmail</div></div>
+      <div class="provider-item"><div class="provider-icon">💬</div><div class="provider-name">Slack</div></div>
+      <div class="provider-item"><div class="provider-icon">📝</div><div class="provider-name">Notion</div></div>
+      <div class="provider-item"><div class="provider-icon">📁</div><div class="provider-name">Google Drive</div></div>
+      <div class="provider-item"><div class="provider-icon">📅</div><div class="provider-name">Calendar</div></div>
+      <div class="provider-item"><div class="provider-icon">📋</div><div class="provider-name">Jira</div></div>
+      <div class="provider-item"><div class="provider-icon">☁️</div><div class="provider-name">Salesforce</div></div>
+      <div class="provider-item"><div class="provider-icon">👥</div><div class="provider-name">HubSpot</div></div>
+      <div class="provider-item"><div class="provider-icon">💳</div><div class="provider-name">Stripe</div></div>
+    </div>
+  </section>
+
+  <!-- Feedback / Early Access -->
+  <section class="cta" id="feedback" style="margin-bottom: 40px">
+    <div class="cta-box" style="background: rgba(99,102,241,0.04); border-color: rgba(99,102,241,0.2);">
+      <h2>We'd love your feedback</h2>
+      <p>Keygate is in early development. Sign up to get notified when we launch and help shape the product.</p>
+      <form onsubmit="event.preventDefault(); const e=document.getElementById('signup-email'); const b=document.getElementById('signup-btn'); const msg=document.getElementById('signup-msg'); b.disabled=true; b.textContent='Signed up!'; msg.textContent='Thanks! We\'ll be in touch at '+e.value; e.value=''; setTimeout(()=>{b.disabled=false;b.textContent='Get Early Access'},3000)" style="display: flex; gap: 12px; justify-content: center; max-width: 480px; margin: 0 auto;">
+        <input id="signup-email" type="email" placeholder="you@company.com" required style="flex: 1; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-primary); color: var(--text-primary); font-size: 14px; outline: none; font-family: inherit;" />
+        <button id="signup-btn" type="submit" class="btn-hero btn-hero-primary" style="white-space: nowrap; padding: 12px 24px; font-size: 14px;">Get Early Access</button>
+      </form>
+      <p id="signup-msg" style="font-size: 13px; color: var(--success); margin-top: 12px; min-height: 20px;"></p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-box">
+      <h2>Stop giving agents your master keys</h2>
+      <p>Free for individuals. Team plans for growing organizations.</p>
+      <a href="/preview.html" class="btn-hero btn-hero-primary" style="display:inline-flex">Get Started <span>→</span></a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Keygate &copy; 2026
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com">GitHub</a>
+      <a href="#">Documentation</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </footer>
+
+</body>
+</html>

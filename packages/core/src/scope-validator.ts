@@ -37,21 +37,21 @@ export class ScopeValidator {
     requested: TokenScope[],
     maximum: TokenScope[],
   ): TokenScope[] {
-    return requested
-      .map((scope) => {
-        const max = maximum.find((m) => m.resource === scope.resource);
-        if (!max) return null;
+    const result: TokenScope[] = [];
+    for (const scope of requested) {
+      const max = maximum.find((m) => m.resource === scope.resource);
+      if (!max) continue;
 
-        const actions = scope.actions.filter((a) => max.actions.includes(a));
-        if (actions.length === 0) return null;
+      const actions = scope.actions.filter((a) => max.actions.includes(a));
+      if (actions.length === 0) continue;
 
-        return {
-          resource: scope.resource,
-          actions,
-          constraints: { ...max.constraints, ...scope.constraints },
-        };
-      })
-      .filter((s): s is TokenScope => s !== null);
+      result.push({
+        resource: scope.resource,
+        actions,
+        constraints: { ...max.constraints, ...scope.constraints },
+      });
+    }
+    return result;
   }
 
   static isPermitted(
