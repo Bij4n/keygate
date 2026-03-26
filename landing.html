@@ -60,18 +60,23 @@
     .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-raised); }
 
     /* ─── ARCHITECTURE ─── */
-    .arch { padding: 0 0 100px; }
-    .arch-box { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 48px; position: relative; overflow: hidden; }
-    .arch-box::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-2), transparent); }
-    .arch-flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
-    .arch-node { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; text-align: center; min-width: 180px; }
+    .arch { padding: 20px 0 120px; }
+    .arch-flow { display: flex; align-items: center; justify-content: center; gap: 0; position: relative; }
+    .arch-node { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; text-align: center; min-width: 200px; position: relative; z-index: 2; transition: all 0.3s; }
+    .arch-node:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
     .arch-node-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
     .arch-node-sub { font-size: 13px; color: var(--text-3); line-height: 1.5; }
     .arch-node.center { border-color: var(--accent-border); background: var(--accent-bg); }
     .arch-node.center .arch-node-title { color: var(--accent); }
-    .arch-arrow { font-size: 20px; color: var(--text-3); padding: 0 16px; flex-shrink: 0; }
-    .arch-down { display: flex; flex-direction: column; align-items: center; margin-top: 24px; gap: 12px; }
-    .arch-down-arrow { color: var(--text-3); font-size: 18px; }
+    .arch-connector { width: 80px; height: 2px; position: relative; z-index: 1; flex-shrink: 0; }
+    .arch-connector::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, var(--border), var(--accent-2), var(--border)); }
+    .arch-connector .arch-pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: flowRight 2s ease-in-out infinite; }
+    @keyframes flowRight { 0% { left: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
+    .arch-connector:nth-of-type(4) .arch-pulse { animation-delay: 0.5s; }
+    .arch-down { display: flex; flex-direction: column; align-items: center; margin-top: 0; gap: 0; position: relative; }
+    .arch-down-line { width: 2px; height: 48px; background: linear-gradient(180deg, var(--accent-2), var(--green)); position: relative; }
+    .arch-down-line .arch-pulse-down { position: absolute; left: -3px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); animation: flowDown 2s ease-in-out infinite; animation-delay: 1s; }
+    @keyframes flowDown { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: calc(100% - 8px); opacity: 0; } }
     .arch-node.bottom { border-color: var(--green-border); background: var(--green-bg); }
     .arch-node.bottom .arch-node-title { color: var(--green); }
 
@@ -142,8 +147,11 @@
     @media (max-width: 900px) {
       .features-grid { grid-template-columns: repeat(2, 1fr); }
       .code-wrapper { grid-template-columns: 1fr; }
-      .arch-flow { flex-direction: column; gap: 12px; }
-      .arch-arrow { transform: rotate(90deg); padding: 4px 0; }
+      .arch-flow { flex-direction: column; gap: 0; }
+      .arch-connector { width: 2px; height: 48px; }
+      .arch-connector::before { background: linear-gradient(180deg, var(--border), var(--accent-2), var(--border)); }
+      .arch-connector .arch-pulse { animation-name: flowDown; top: 0; left: -3px; }
+      @keyframes flowDown900 { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: calc(100% - 8px); opacity: 0; } }
     }
     @media (max-width: 640px) {
       .nav-links a:not(.nav-cta) { display: none; }
@@ -155,7 +163,6 @@
       .btn { width: 100%; max-width: 300px; justify-content: center; }
       .feedback-form { flex-direction: column; }
       .feedback-box { padding: 40px 24px; }
-      .arch-box { padding: 28px 16px; }
       .arch-node { min-width: 0; width: 100%; }
       .provider-row { gap: 10px; }
       .prov { width: 64px; height: 64px; border-radius: 12px; }
@@ -203,29 +210,27 @@
 <!-- Architecture -->
 <section class="arch">
   <div class="container">
-    <div class="arch-box">
-      <div class="arch-flow">
-        <div class="arch-node">
-          <div class="arch-node-title">Your Agents</div>
-          <div class="arch-node-sub">Claude, GPT, custom<br>Any framework</div>
-        </div>
-        <div class="arch-arrow">&#8594;</div>
-        <div class="arch-node center">
-          <div class="arch-node-title">Keygate Broker</div>
-          <div class="arch-node-sub">Scoped tokens<br>Policy enforcement</div>
-        </div>
-        <div class="arch-arrow">&#8594;</div>
-        <div class="arch-node">
-          <div class="arch-node-title">Your Services</div>
-          <div class="arch-node-sub">Gmail, GitHub, Slack<br>Stripe, Jira, ...</div>
-        </div>
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-title">Your Agents</div>
+        <div class="arch-node-sub">Claude, GPT, custom<br>Any framework</div>
       </div>
-      <div class="arch-down">
-        <div class="arch-down-arrow">&#8595;</div>
-        <div class="arch-node bottom">
-          <div class="arch-node-title">Dashboard + Audit + Alerts</div>
-          <div class="arch-node-sub">Real-time visibility, anomaly detection, one-click control</div>
-        </div>
+      <div class="arch-connector"><div class="arch-pulse"></div></div>
+      <div class="arch-node center">
+        <div class="arch-node-title">Keygate Broker</div>
+        <div class="arch-node-sub">Scoped tokens<br>Policy enforcement</div>
+      </div>
+      <div class="arch-connector"><div class="arch-pulse"></div></div>
+      <div class="arch-node">
+        <div class="arch-node-title">Your Services</div>
+        <div class="arch-node-sub">Gmail, GitHub, Slack<br>Stripe, Jira, ...</div>
+      </div>
+    </div>
+    <div class="arch-down">
+      <div class="arch-down-line"><div class="arch-pulse-down"></div></div>
+      <div class="arch-node bottom">
+        <div class="arch-node-title">Dashboard + Audit + Alerts</div>
+        <div class="arch-node-sub">Real-time visibility, anomaly detection, one-click control</div>
       </div>
     </div>
   </div>
