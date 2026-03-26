@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { createHash } from 'node:crypto';
 import jwt from 'jsonwebtoken';
+import { query } from '../db/pool.js';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-change-me';
 
@@ -47,9 +49,41 @@ export function authenticate(
       res.status(401).json({ error: 'Invalid API key format' });
       return;
     }
-    // TODO: implement API key lookup against database
-    req.auth = { userId: 'api-key-user', email: '', role: 'member' };
-    next();
+
+    const keyHash = createHash('sha256').update(apiKey).digest('hex');
+
+    query(
+      `SELECT ak.id, ak.user_id, ak.team_id, ak.scopes, ak.expires_at, u.email, u.role
+       FROM api_keys ak JOIN users u ON ak.user_id = u.id
+       WHERE ak.key_hash = $1`,
+      [keyHash],
+    )
+      .then(({ rows }) => {
+        if (rows.length === 0) {
+          res.status(401).json({ error: 'Invalid API key' });
+          return;
+        }
+
+        const row = rows[0];
+
+        if (row.expires_at && new Date(row.expires_at) < new Date()) {
+          res.status(401).json({ error: 'API key expired' });
+          return;
+        }
+
+        query('UPDATE api_keys SET last_used_at = NOW() WHERE id = $1', [row.id]).catch(() => {});
+
+        req.auth = {
+          userId: row.user_id,
+          email: row.email,
+          teamId: row.team_id,
+          role: row.role,
+        };
+        next();
+      })
+      .catch(() => {
+        res.status(500).json({ error: 'Authentication error' });
+      });
     return;
   }
 

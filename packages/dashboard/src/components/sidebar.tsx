@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Shield,
   LayoutDashboard,
@@ -6,7 +8,9 @@ import {
   ScrollText,
   Users,
   Settings,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/', active: true },
@@ -18,6 +22,17 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const { user, logout } = useAuth();
+
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() ?? '??';
+
   return (
     <aside
       style={{
@@ -99,32 +114,49 @@ export function Sidebar() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
+            justifyContent: 'space-between',
             padding: '8px 12px',
           }}
         >
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'var(--accent)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: 'white',
-            }}
-          >
-            JD
-          </div>
-          <div>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>John Doe</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Personal
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'white',
+              }}
+            >
+              {initials}
+            </div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 500 }}>
+                {user?.name ?? user?.email ?? 'User'}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                {user?.role ?? 'member'}
+              </div>
             </div>
           </div>
+          <button
+            onClick={logout}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              padding: '4px',
+            }}
+            title="Sign out"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

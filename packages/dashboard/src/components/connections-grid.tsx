@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import {
   Github,
   Mail,
@@ -5,74 +8,26 @@ import {
   FileText,
   HardDrive,
   Calendar,
+  Layout,
+  Cloud,
+  Users,
+  CreditCard,
   MoreVertical,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   github: Github,
-  mail: Mail,
-  'message-square': MessageSquare,
-  'file-text': FileText,
-  'hard-drive': HardDrive,
+  gmail: Mail,
+  slack: MessageSquare,
+  notion: FileText,
+  google_drive: HardDrive,
   calendar: Calendar,
+  jira: Layout,
+  salesforce: Cloud,
+  hubspot: Users,
+  stripe: CreditCard,
 };
-
-const MOCK_CONNECTIONS = [
-  {
-    id: 'conn_1',
-    provider: 'GitHub',
-    icon: 'github',
-    status: 'active' as const,
-    scopes: ['repo:read', 'read:user'],
-    activeTokens: 2,
-    lastUsed: '3 min ago',
-  },
-  {
-    id: 'conn_2',
-    provider: 'Gmail',
-    icon: 'mail',
-    status: 'active' as const,
-    scopes: ['gmail.readonly'],
-    activeTokens: 1,
-    lastUsed: '12 min ago',
-  },
-  {
-    id: 'conn_3',
-    provider: 'Slack',
-    icon: 'message-square',
-    status: 'active' as const,
-    scopes: ['channels:read', 'chat:write'],
-    activeTokens: 0,
-    lastUsed: '2 hours ago',
-  },
-  {
-    id: 'conn_4',
-    provider: 'Notion',
-    icon: 'file-text',
-    status: 'active' as const,
-    scopes: ['read_content'],
-    activeTokens: 1,
-    lastUsed: '1 hour ago',
-  },
-  {
-    id: 'conn_5',
-    provider: 'Google Drive',
-    icon: 'hard-drive',
-    status: 'expired' as const,
-    scopes: ['drive.readonly'],
-    activeTokens: 0,
-    lastUsed: '3 days ago',
-  },
-  {
-    id: 'conn_6',
-    provider: 'Calendar',
-    icon: 'calendar',
-    status: 'active' as const,
-    scopes: ['calendar.readonly'],
-    activeTokens: 1,
-    lastUsed: '30 min ago',
-  },
-];
 
 const statusColors: Record<string, string> = {
   active: 'var(--success)',
@@ -80,7 +35,65 @@ const statusColors: Record<string, string> = {
   revoked: 'var(--danger)',
 };
 
+interface ConnectionData {
+  id: string;
+  provider: string;
+  status: string;
+  scopes: string[];
+  lastUsedAt?: string | null;
+}
+
 export function ConnectionsGrid() {
+  const [connections, setConnections] = useState<ConnectionData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .getConnections()
+      .then((data) => setConnections(data.connections))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleRevoke(id: string) {
+    try {
+      await api.revokeConnection(id);
+      setConnections((prev) => prev.filter((c) => c.id !== id));
+    } catch {
+      // handle error
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ color: 'var(--text-muted)', padding: '20px' }}>
+        Loading connections...
+      </div>
+    );
+  }
+
+  if (connections.length === 0) {
+    return (
+      <div
+        style={{
+          padding: '40px',
+          textAlign: 'center',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          color: 'var(--text-muted)',
+        }}
+      >
+        <p style={{ marginBottom: '8px', fontSize: '15px' }}>
+          No connections yet
+        </p>
+        <p style={{ fontSize: '13px' }}>
+          Connect a service to start managing agent access
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -89,8 +102,10 @@ export function ConnectionsGrid() {
         gap: '12px',
       }}
     >
-      {MOCK_CONNECTIONS.map((conn) => {
-        const IconComponent = iconMap[conn.icon] ?? FileText;
+      {connections.map((conn) => {
+        const IconComponent = iconMap[conn.provider] ?? FileText;
+        const statusColor = statusColors[conn.status] ?? 'var(--text-muted)';
+
         return (
           <div
             key={conn.id}
@@ -128,12 +143,12 @@ export function ConnectionsGrid() {
                 </div>
                 <div>
                   <div style={{ fontWeight: 500, fontSize: '15px' }}>
-                    {conn.provider}
+                    {conn.provider.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                   </div>
                   <div
                     style={{
                       fontSize: '11px',
-                      color: statusColors[conn.status],
+                      color: statusColor,
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
@@ -144,7 +159,7 @@ export function ConnectionsGrid() {
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        background: statusColors[conn.status],
+                        background: statusColor,
                         display: 'inline-block',
                       }}
                     />
@@ -198,11 +213,10 @@ export function ConnectionsGrid() {
                 color: 'var(--text-muted)',
               }}
             >
-              <span>
-                {conn.activeTokens} active token
-                {conn.activeTokens !== 1 ? 's' : ''}
-              </span>
-              <span>Last used {conn.lastUsed}</span>
+              <span>{conn.id.slice(0, 12)}...</span>
+              {conn.lastUsedAt && (
+                <span>Last used {new Date(conn.lastUsedAt).toLocaleDateString()}</span>
+              )}
             </div>
 
             <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
@@ -221,6 +235,7 @@ export function ConnectionsGrid() {
                 Manage
               </button>
               <button
+                onClick={() => handleRevoke(conn.id)}
                 style={{
                   padding: '6px 12px',
                   fontSize: '12px',

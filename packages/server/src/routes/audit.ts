@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { vaultStore } from '../services.js';
 
 const router = Router();
 
@@ -15,14 +16,26 @@ const AuditQuerySchema = z.object({
 
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const query = AuditQuerySchema.parse(req.query);
+    const filters = AuditQuerySchema.parse(req.query);
+    const result = await vaultStore.queryAuditLog(req.auth!.userId, filters);
 
-    // TODO: query from database with filters
     res.json({
-      entries: [],
-      total: 0,
-      limit: query.limit,
-      offset: query.offset,
+      entries: result.entries.map((e) => ({
+        id: e.id,
+        timestamp: e.timestamp.toISOString(),
+        connectionId: e.connectionId,
+        tokenId: e.tokenId,
+        agentId: e.agentId,
+        action: e.action,
+        resource: e.resource,
+        provider: e.provider,
+        metadata: e.metadata,
+        success: e.success,
+        error: e.error,
+      })),
+      total: result.total,
+      limit: filters.limit,
+      offset: filters.offset,
     });
   } catch (err) {
     next(err);
@@ -31,18 +44,18 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 router.get(
   '/summary',
-  async (_req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // TODO: aggregate stats from database
+      const summary = await vaultStore.getAuditSummary(req.auth!.userId);
       res.json({
-        totalRequests: 0,
-        uniqueAgents: 0,
-        activeConnections: 0,
-        tokensIssued: 0,
-        tokensRevoked: 0,
+        totalRequests: summary.totalRequests,
+        uniqueAgents: summary.uniqueAgents,
+        activeConnections: summary.activeConnections,
+        tokensIssued: summary.tokensIssued,
+        tokensRevoked: summary.tokensRevoked,
         last24h: {
-          requests: 0,
-          uniqueAgents: 0,
+          requests: summary.last24hRequests,
+          uniqueAgents: summary.last24hAgents,
         },
       });
     } catch (err) {
@@ -55,13 +68,23 @@ router.get(
   '/export',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      AuditQuerySchema.parse(req.query);
+      const filters = AuditQuerySchema.parse(req.query);
+      const result = await vaultStore.queryAuditLog(req.auth!.userId, {
+        ...filters,
+        limit: 10000,
+        offset: 0,
+      });
+
       res.setHeader('Content-Type', 'application/json');
       res.setHeader(
         'Content-Disposition',
         'attachment; filename="keygate-audit-export.json"',
       );
-      res.json({ entries: [], exported_at: new Date().toISOString() });
+      res.json({
+        entries: result.entries,
+        total: result.total,
+        exported_at: new Date().toISOString(),
+      });
     } catch (err) {
       next(err);
     }

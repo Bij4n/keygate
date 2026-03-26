@@ -1,33 +1,45 @@
-import { Link2, Key, Shield, AlertTriangle } from 'lucide-react';
+'use client';
 
-const stats = [
-  {
-    label: 'Active Connections',
-    value: '5',
-    icon: Link2,
-    color: 'var(--accent)',
-  },
-  {
-    label: 'Tokens Issued (24h)',
-    value: '23',
-    icon: Key,
-    color: 'var(--success)',
-  },
-  {
-    label: 'Access Events (24h)',
-    value: '147',
-    icon: Shield,
-    color: 'var(--text-secondary)',
-  },
-  {
-    label: 'Anomalies',
-    value: '0',
-    icon: AlertTriangle,
-    color: 'var(--warning)',
-  },
-];
+import { useState, useEffect } from 'react';
+import { Link2, Key, Shield, AlertTriangle } from 'lucide-react';
+import { api } from '@/lib/api';
+
+interface Stats {
+  activeConnections: number;
+  tokensIssued: number;
+  last24hRequests: number;
+  anomalies: number;
+}
 
 export function StatsBar() {
+  const [stats, setStats] = useState<Stats>({
+    activeConnections: 0,
+    tokensIssued: 0,
+    last24hRequests: 0,
+    anomalies: 0,
+  });
+
+  useEffect(() => {
+    api
+      .getAuditSummary()
+      .then((data) => {
+        setStats({
+          activeConnections: data.activeConnections ?? 0,
+          tokensIssued: data.tokensIssued ?? 0,
+          last24hRequests: data.last24h?.requests ?? 0,
+          anomalies: 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const items = [
+    { label: 'Active Connections', value: String(stats.activeConnections), icon: Link2, color: 'var(--accent)' },
+    { label: 'Tokens Issued', value: String(stats.tokensIssued), icon: Key, color: 'var(--success)' },
+    { label: 'Events (24h)', value: String(stats.last24hRequests), icon: Shield, color: 'var(--text-secondary)' },
+    { label: 'Anomalies', value: String(stats.anomalies), icon: AlertTriangle, color: 'var(--warning)' },
+  ];
+
   return (
     <div
       style={{
@@ -37,7 +49,7 @@ export function StatsBar() {
         marginBottom: '32px',
       }}
     >
-      {stats.map((stat) => (
+      {items.map((stat) => (
         <div
           key={stat.label}
           style={{

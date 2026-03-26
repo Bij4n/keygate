@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import {
   ArrowRight,
   Key,
@@ -5,72 +8,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from 'lucide-react';
-
-const MOCK_ACTIVITY = [
-  {
-    id: 'aud_1',
-    timestamp: '2 min ago',
-    action: 'token.issued',
-    agentId: 'coding-assistant',
-    provider: 'GitHub',
-    detail: 'Issued read-only token for repo access',
-    success: true,
-  },
-  {
-    id: 'aud_2',
-    timestamp: '5 min ago',
-    action: 'token.resolved',
-    agentId: 'coding-assistant',
-    provider: 'GitHub',
-    detail: 'Token resolved — accessed repos endpoint',
-    success: true,
-  },
-  {
-    id: 'aud_3',
-    timestamp: '12 min ago',
-    action: 'token.issued',
-    agentId: 'email-summarizer',
-    provider: 'Gmail',
-    detail: 'Issued read-only token for inbox access',
-    success: true,
-  },
-  {
-    id: 'aud_4',
-    timestamp: '18 min ago',
-    action: 'token.denied',
-    agentId: 'unknown-agent',
-    provider: 'Slack',
-    detail: 'Token request denied — agent not authorized',
-    success: false,
-  },
-  {
-    id: 'aud_5',
-    timestamp: '45 min ago',
-    action: 'token.expired',
-    agentId: 'research-bot',
-    provider: 'Notion',
-    detail: 'Token expired after 1h TTL',
-    success: true,
-  },
-  {
-    id: 'aud_6',
-    timestamp: '1 hour ago',
-    action: 'token.revoked',
-    agentId: 'coding-assistant',
-    provider: 'GitHub',
-    detail: 'Token manually revoked by user',
-    success: true,
-  },
-  {
-    id: 'aud_7',
-    timestamp: '2 hours ago',
-    action: 'connection.created',
-    agentId: 'system',
-    provider: 'Calendar',
-    detail: 'New Google Calendar connection established',
-    success: true,
-  },
-];
+import { api } from '@/lib/api';
 
 const actionIcons: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   'token.issued': Key,
@@ -78,6 +16,7 @@ const actionIcons: Record<string, React.ComponentType<{ size?: number; color?: s
   'token.denied': XCircle,
   'token.expired': AlertTriangle,
   'token.revoked': XCircle,
+  'tokens.revoked_all': XCircle,
   'connection.created': CheckCircle,
 };
 
@@ -87,10 +26,72 @@ const actionColors: Record<string, string> = {
   'token.denied': 'var(--danger)',
   'token.expired': 'var(--warning)',
   'token.revoked': 'var(--text-muted)',
+  'tokens.revoked_all': 'var(--danger)',
   'connection.created': 'var(--success)',
 };
 
+interface AuditEntry {
+  id: string;
+  timestamp: string;
+  action: string;
+  agentId: string;
+  provider: string;
+  connectionId: string;
+  success: boolean;
+}
+
 export function ActivityFeed() {
+  const [entries, setEntries] = useState<AuditEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .getAuditLog({ limit: '20' })
+      .then((data) => setEntries(data.entries))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ color: 'var(--text-muted)', padding: '20px' }}>
+        Loading activity...
+      </div>
+    );
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div
+        style={{
+          padding: '40px',
+          textAlign: 'center',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          color: 'var(--text-muted)',
+        }}
+      >
+        <p style={{ fontSize: '15px', marginBottom: '8px' }}>No activity yet</p>
+        <p style={{ fontSize: '13px' }}>
+          Token requests and access events will appear here
+        </p>
+      </div>
+    );
+  }
+
+  function formatTime(ts: string): string {
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return d.toLocaleDateString();
+  }
+
   return (
     <div
       style={{
@@ -109,7 +110,7 @@ export function ActivityFeed() {
       >
         <thead>
           <tr style={{ borderBottom: '1px solid var(--border)' }}>
-            {['Event', 'Agent', 'Service', 'Detail', 'Time'].map(
+            {['Event', 'Agent', 'Service', 'Status', 'Time'].map(
               (header, i) => (
                 <th
                   key={header}
@@ -130,7 +131,7 @@ export function ActivityFeed() {
           </tr>
         </thead>
         <tbody>
-          {MOCK_ACTIVITY.map((entry) => {
+          {entries.map((entry) => {
             const IconComponent = actionIcons[entry.action] ?? Key;
             const color = actionColors[entry.action] ?? 'var(--text-secondary)';
             return (
@@ -171,13 +172,17 @@ export function ActivityFeed() {
                 >
                   {entry.provider}
                 </td>
-                <td
-                  style={{
-                    padding: '12px 16px',
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  {entry.detail}
+                <td style={{ padding: '12px 16px' }}>
+                  <span
+                    style={{
+                      color: entry.success
+                        ? 'var(--success)'
+                        : 'var(--danger)',
+                      fontSize: '12px',
+                    }}
+                  >
+                    {entry.success ? 'success' : 'failed'}
+                  </span>
                 </td>
                 <td
                   style={{
@@ -186,7 +191,7 @@ export function ActivityFeed() {
                     color: 'var(--text-muted)',
                   }}
                 >
-                  {entry.timestamp}
+                  {formatTime(entry.timestamp)}
                 </td>
               </tr>
             );

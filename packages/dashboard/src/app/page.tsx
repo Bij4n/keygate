@@ -1,9 +1,36 @@
+'use client';
+
+import { useAuth } from '@/lib/auth-context';
 import { Sidebar } from '@/components/sidebar';
 import { ConnectionsGrid } from '@/components/connections-grid';
 import { ActivityFeed } from '@/components/activity-feed';
 import { StatsBar } from '@/components/stats-bar';
+import { useEffect } from 'react';
 
 export default function Dashboard() {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login';
+    }
+  }, [user, loading]);
+
+  if (loading || !user) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{ color: 'var(--text-muted)' }}>Loading...</span>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar />

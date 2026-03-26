@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import { vault, vaultStore } from '../services.js';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const IssueTokenSchema = z.object({
   ),
   ttl: z.number().min(60).max(86400).optional(),
   maxUsage: z.number().min(1).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const ResolveTokenSchema = z.object({
@@ -27,14 +29,26 @@ router.post(
     try {
       const body = IssueTokenSchema.parse(req.body);
 
-      // TODO: wire up Vault.issueToken()
-      res.status(201).json({
-        tokenId: 'tok_placeholder',
-        reference: 'ref_placeholder',
-        expiresAt: new Date(
-          Date.now() + (body.ttl ?? 3600) * 1000,
-        ).toISOString(),
+      const connection = await vaultStore.getConnection(body.connectionId);
+      if (!connection || connection.userId !== req.auth!.userId) {
+        res.status(404).json({ error: 'Connection not found' });
+        return;
+      }
+
+      const result = await vault.issueToken({
+        connectionId: body.connectionId,
+        agentId: body.agentId,
         scopes: body.scopes,
+        ttl: body.ttl,
+        maxUsage: body.maxUsage,
+        metadata: body.metadata,
+      });
+
+      res.status(201).json({
+        tokenId: result.tokenId,
+        reference: result.reference,
+        expiresAt: result.expiresAt.toISOString(),
+        scopes: result.scopes,
       });
     } catch (err) {
       next(err);
@@ -47,11 +61,11 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { reference } = ResolveTokenSchema.parse(req.body);
+      const result = await vault.resolveToken(reference);
 
-      // TODO: wire up Vault.resolveToken()
       res.json({
-        accessToken: 'resolved_token_placeholder',
-        scopes: [],
+        accessToken: result.accessToken,
+        scopes: result.scopes,
       });
     } catch (err) {
       next(err);
@@ -64,7 +78,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tokenId } = req.params;
-      // TODO: wire up Vault.revokeToken()
+      await vault.revokeToken(tokenId, req.auth!.userId);
       res.json({ tokenId, revokedAt: new Date().toISOString() });
     } catch (err) {
       next(err);
@@ -77,8 +91,27 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { connectionId } = req.params;
-      // TODO: query active tokens from database
-      res.json({ tokens: [], connectionId });
+
+      const connection = await vaultStore.getConnection(connectionId);
+      if (!connection || connection.userId !== req.auth!.userId) {
+        res.status(404).json({ error: 'Connection not found' });
+        return;
+      }
+
+      const tokens = await vaultStore.listTokensByConnection(connectionId);
+
+      res.json({
+        tokens: tokens.map((t) => ({
+          id: t.id,
+          agentId: t.agentId,
+          scopes: t.scopes,
+          issuedAt: t.issuedAt.toISOString(),
+          expiresAt: t.expiresAt.toISOString(),
+          usageCount: t.usageCount,
+          maxUsage: t.maxUsage,
+        })),
+        connectionId,
+      });
     } catch (err) {
       next(err);
     }
