@@ -58,6 +58,12 @@ export interface AuditEntry {
   provider: Provider;
   metadata: Record<string, unknown>;
   ip?: string;
+  userAgent?: string;
+  frameworkId?: string;
+  sessionId?: string;
+  requestLatencyMs?: number;
+  tokenResolved?: boolean;
+  scopesRequested?: string[];
   success: boolean;
   error?: string;
 }

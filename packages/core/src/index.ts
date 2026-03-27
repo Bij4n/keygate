@@ -39,6 +39,21 @@ export {
   type AgentStats,
 } from './agents.js';
 export {
+  McpRegistry,
+  type McpServerEntry,
+  type ReputationSignals,
+  type McpToolSummary,
+  type CredentialAccessProfile,
+  type CommunityRating,
+  type Vulnerability,
+  type RegistrySearchOptions,
+} from './registry.js';
+export {
+  SiemExporter,
+  type SiemConfig,
+  type SiemEvent,
+} from './siem.js';
+export {
   WebhookDispatcher,
   type WebhookConfig,
   type WebhookEvent,

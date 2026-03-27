@@ -32,6 +32,9 @@ import { approvalsRouter, approvalManager } from './routes/approvals.js';
 import { agentsRouter, agentRegistry } from './routes/agents.js';
 import { alertsRouter, addAlert, getUnacknowledgedCount } from './routes/alerts.js';
 import { webhooksRouter, webhookDispatcher } from './routes/webhooks.js';
+import { registryRouter } from './routes/registry.js';
+import { siemRouter, siemExporter } from './routes/siem.js';
+import { telemetry } from './middleware/telemetry.js';
 
 const JWT_SECRET = 'demo-jwt-secret-' + randomBytes(16).toString('hex');
 const ENCRYPTION_KEY = 'demo-encryption-key-' + randomBytes(16).toString('hex');
@@ -54,6 +57,7 @@ const port = process.env.PORT ?? 3100;
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+app.use(telemetry);
 
 // Serve preview.html at root
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -303,6 +307,8 @@ app.use('/api/approvals', authenticate, approvalsRouter);
 app.use('/api/agents', authenticate, agentsRouter);
 app.use('/api/alerts', authenticate, alertsRouter);
 app.use('/api/webhooks', authenticate, webhooksRouter);
+app.use('/api/registry', registryRouter);  // Public — no auth required
+app.use('/api/siem', authenticate, siemRouter);
 
 // Anomaly analysis hook — runs on every audit entry
 const originalAppendAudit = store.appendAuditLog.bind(store);
@@ -329,6 +335,8 @@ store.appendAuditLog = async function (entry: AuditEntry) {
     }).catch(() => {});
   }
   agentRegistry.recordActivity(entry.agentId, entry.action, entry.success);
+  // Export to SIEM
+  siemExporter.ingest(entry);
 };
 
 // === Seed demo data on first user registration ===
