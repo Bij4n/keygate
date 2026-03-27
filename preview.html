@@ -4,589 +4,610 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Keygate</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #09090b; --bg-raised: #111114; --bg-card: #18181b;
-      --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
-      --text: #fafafa; --text-2: #a1a1aa; --text-3: #71717a;
-      --accent: #818cf8; --accent-2: #6366f1; --accent-bg: rgba(99,102,241,0.08); --accent-border: rgba(99,102,241,0.2);
-      --green: #34d399; --green-bg: rgba(52,211,153,0.06); --green-border: rgba(52,211,153,0.15);
-      --red: #f87171; --red-bg: rgba(248,113,113,0.06); --red-border: rgba(248,113,113,0.15);
-      --orange: #fb923c; --orange-bg: rgba(251,146,60,0.06);
-      --radius: 10px;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#09090b;--bg-2:#0f0f12;--bg-card:#141418;--bg-hover:#1a1a1f;
+      --border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.1);
+      --text:#f4f4f5;--text-2:#a1a1aa;--text-3:#71717a;--text-4:#52525b;
+      --accent:#818cf8;--accent-2:#6366f1;--accent-bg:rgba(99,102,241,0.06);--accent-border:rgba(99,102,241,0.12);
+      --green:#34d399;--green-bg:rgba(52,211,153,0.06);--green-border:rgba(52,211,153,0.1);
+      --red:#f87171;--red-bg:rgba(248,113,113,0.06);--red-border:rgba(248,113,113,0.1);
+      --orange:#fb923c;--orange-bg:rgba(251,146,60,0.06);--orange-border:rgba(251,146,60,0.1);
+      --yellow:#facc15;
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-    input, select, textarea, button { font-family: inherit; }
+    body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:13px}
+    input,select,textarea,button{font-family:inherit;font-size:inherit}
+    a{color:inherit;text-decoration:none}
 
     /* Layout */
-    .app { display: flex; min-height: 100vh; }
-    .sidebar { width: 220px; height: 100vh; position: fixed; left: 0; top: 0; background: var(--bg-raised); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 10px; z-index: 10; }
-    .logo { display: flex; align-items: center; gap: 8px; padding: 0 12px; margin-bottom: 28px; font-size: 17px; font-weight: 700; letter-spacing: -0.03em; cursor: pointer; }
-    .nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
-    .nav a { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--text-3); cursor: pointer; transition: all 0.15s; text-decoration: none; }
-    .nav a:hover { color: var(--text-2); background: rgba(255,255,255,0.03); }
-    .nav a.active { color: var(--text); background: rgba(255,255,255,0.05); font-weight: 500; }
-    .nav a .badge-count { margin-left: auto; font-size: 11px; background: var(--accent-bg); color: var(--accent); padding: 1px 7px; border-radius: 10px; font-weight: 600; }
-    .sidebar-footer { border-top: 1px solid var(--border); padding-top: 14px; }
-    .user-row { display: flex; align-items: center; gap: 9px; padding: 8px 12px; }
-    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; flex-shrink: 0; }
-    .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role { font-size: 11px; color: var(--text-3); }
-    .btn-logout { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 11px; margin-left: auto; padding: 4px 8px; border-radius: 4px; }
-    .btn-logout:hover { color: var(--red); background: var(--red-bg); }
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:232px;height:100vh;position:fixed;left:0;top:0;background:var(--bg-2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 8px;z-index:20;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+    .sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:0 10px;margin-bottom:24px}
+    .logo{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:700;letter-spacing:-.03em;cursor:pointer}
+    .logo svg{transition:transform .3s}.logo:hover svg{transform:rotate(-8deg) scale(1.08)}
+    .nav-section{margin-bottom:16px}
+    .nav-label{font-size:10px;font-weight:600;color:var(--text-4);text-transform:uppercase;letter-spacing:.1em;padding:0 10px;margin-bottom:4px}
+    .nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;font-size:13px;color:var(--text-3);cursor:pointer;transition:all .15s;position:relative}
+    .nav-item:hover{color:var(--text-2);background:rgba(255,255,255,.03)}
+    .nav-item.active{color:var(--text);background:rgba(255,255,255,.05);font-weight:500}
+    .nav-item .badge{margin-left:auto;font-size:10px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:9px;font-weight:600}
+    .nav-item .badge.red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+    .nav-item .badge.accent{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+    .sidebar-footer{margin-top:auto;border-top:1px solid var(--border);padding-top:12px}
+    .user-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background .15s}
+    .user-card:hover{background:rgba(255,255,255,.03)}
+    .avatar{width:28px;height:28px;border-radius:7px;background:var(--accent-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;flex-shrink:0}
+    .user-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-meta{font-size:10px;color:var(--text-4)}
 
-    main { flex: 1; margin-left: 220px; padding: 28px 32px; }
-    .page-header { margin-bottom: 28px; }
-    .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
-    .page-header p { font-size: 14px; color: var(--text-2); }
+    /* Mobile nav */
+    .mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--bg-2);border-bottom:1px solid var(--border);z-index:15;padding:0 16px;align-items:center;justify-content:space-between}
+    .hamburger{background:none;border:none;color:var(--text);cursor:pointer;padding:8px}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:18}
+    .overlay.show{display:block}
 
-    /* Stats */
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
-    .stat { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
-    .stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-    .stat-value { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+    /* Main content */
+    main{flex:1;margin-left:232px;padding:24px 28px;min-height:100vh}
+    .page-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+    .page-title{font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:2px}
+    .page-desc{font-size:13px;color:var(--text-3)}
+
+    /* Alert banner */
+    .alert-banner{background:var(--red-bg);border:1px solid var(--red-border);border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;animation:fadeIn .4s}
+    .alert-banner .alert-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    .alert-banner-text{flex:1;font-size:13px;color:var(--red)}
+    .alert-banner-text strong{font-weight:600}
+    .alert-banner-action{font-size:12px;color:var(--red);font-weight:600;cursor:pointer;white-space:nowrap;padding:4px 10px;border:1px solid var(--red-border);border-radius:6px;background:transparent;transition:background .15s}
+    .alert-banner-action:hover{background:var(--red-bg)}
+
+    /* Stats grid */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+    .stat{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:border-color .2s}
+    .stat:hover{border-color:var(--border-h)}
+    .stat-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .stat-label{font-size:11px;color:var(--text-4);text-transform:uppercase;letter-spacing:.06em;font-weight:500}
+    .stat-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+    .stat-value{font-size:24px;font-weight:700;letter-spacing:-.02em}
+    .stat-change{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px}
+    .stat-change.up{color:var(--green)}.stat-change.down{color:var(--red)}.stat-change.neutral{color:var(--text-4)}
 
     /* Cards */
-    .card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    .card-header h2 { font-size: 14px; font-weight: 600; }
-    .card-body { padding: 18px; }
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s}
+    .card:hover{border-color:var(--border-h)}
+    .card-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .card-head h2{font-size:13px;font-weight:600}
+    .card-body{padding:16px}
+    .card-empty{padding:40px 20px;text-align:center;color:var(--text-4)}
+    .card-empty p:first-child{font-size:13px;color:var(--text-3);margin-bottom:4px}
+    .card-empty p:last-child{font-size:12px}
 
     /* Buttons */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.15s; }
-    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
-    .btn-primary { background: var(--accent-2); color: white; }
-    .btn-primary:hover { background: var(--accent); }
-    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
-    .btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
-    .btn-danger { background: transparent; color: var(--red); border: 1px solid var(--red-border); }
-    .btn-danger:hover { background: var(--red-bg); }
+    .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .btn-sm{padding:5px 9px;font-size:11px;border-radius:6px}
+    .btn-primary{background:var(--accent-2);color:white}.btn-primary:hover{background:var(--accent)}
+    .btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--border-h);color:var(--text)}
+    .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-border)}.btn-danger:hover{background:var(--red-bg)}
+    .btn-success{background:transparent;color:var(--green);border:1px solid var(--green-border)}.btn-success:hover{background:var(--green-bg)}
 
     /* Tables */
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th { text-align: left; padding: 10px 16px; color: var(--text-3); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text-2); }
-    tr:last-child td { border-bottom: none; }
-    th:last-child, td:last-child { text-align: right; }
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:8px 14px;color:var(--text-4);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+    td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-2);font-size:13px}
+    tr:last-child td{border-bottom:none}
+    th:last-child,td:last-child{text-align:right}
+    tr:hover td{background:rgba(255,255,255,.01)}
 
     /* Tags */
-    .tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-    .tag-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-    .tag-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
-    .tag-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(251,146,60,0.15); }
-    .tag-gray { background: rgba(255,255,255,0.04); color: var(--text-3); border: 1px solid var(--border); }
-    .tag-accent { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
-    .code-tag { font-family: 'SF Mono', monospace; font-size: 12px; padding: 2px 7px; border-radius: 4px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-2); }
-
-    /* Connections grid */
-    .conn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-    .conn-card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color 0.15s; }
-    .conn-card:hover { border-color: var(--border-hover); }
-    .conn-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-    .conn-provider { display: flex; align-items: center; gap: 10px; }
-    .conn-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .conn-name { font-weight: 500; font-size: 14px; }
-    .conn-status { font-size: 11px; display: flex; align-items: center; gap: 4px; }
-    .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
-    .conn-scopes { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
-    .conn-actions { display: flex; gap: 6px; }
-    .conn-actions .btn { flex: 1; justify-content: center; }
-
-    /* Empty state */
-    .empty { padding: 48px; text-align: center; color: var(--text-3); }
-    .empty p:first-child { font-size: 14px; margin-bottom: 6px; color: var(--text-2); }
-
-    /* Modal */
-    .modal-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
-    .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 18px; }
-    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .modal-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: transparent; color: var(--text); font-size: 13px; font-weight: 500; }
-    .modal-item:hover { border-color: var(--accent-border); background: var(--accent-bg); }
-    .modal-icon { font-size: 18px; }
-
-    /* Forms */
-    .form-group { margin-bottom: 14px; }
-    .form-label { display: block; font-size: 12px; color: var(--text-2); margin-bottom: 5px; font-weight: 500; }
-    .form-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; outline: none; }
-    .form-input:focus { border-color: var(--accent-border); }
-    .form-select { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; outline: none; appearance: none; }
+    .tag{display:inline-flex;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.02em}
+    .t-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+    .t-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+    .t-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-border)}
+    .t-accent{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+    .t-gray{background:rgba(255,255,255,.03);color:var(--text-3);border:1px solid var(--border)}
+    .code{font-family:'SF Mono','Fira Code',monospace;font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--text-2)}
 
     /* Trust bar */
-    .trust-bar { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
-    .trust-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .trust{display:flex;align-items:center;gap:6px}
+    .trust-num{font-size:12px;font-weight:600;min-width:20px}
+    .trust-bar{flex:1;max-width:48px;height:5px;border-radius:3px;background:rgba(255,255,255,.04);overflow:hidden}
+    .trust-fill{height:100%;border-radius:3px;transition:width .5s}
+
+    /* Connection cards */
+    .conn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+    .conn{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:all .25s}
+    .conn:hover{border-color:var(--border-h);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.15)}
+    .conn-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .conn-info{display:flex;align-items:center;gap:9px}
+    .conn-icon{width:34px;height:34px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:17px}
+    .conn-name{font-weight:600;font-size:13px}
+    .conn-status{font-size:10px;display:flex;align-items:center;gap:4px}
+    .dot{width:5px;height:5px;border-radius:50%;display:inline-block}
+    .conn-scopes{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px}
+    .conn-foot{display:flex;gap:6px}
+    .conn-foot .btn{flex:1;justify-content:center}
+
+    /* Filter bar */
+    .filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .filter-input{padding:7px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;outline:none;min-width:180px;transition:border-color .2s}
+    .filter-input:focus{border-color:var(--accent-border)}
+    .filter-input::placeholder{color:var(--text-4)}
+    .filter-select{padding:7px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text-2);font-size:12px;outline:none;appearance:none;cursor:pointer}
+
+    /* Tabs */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+    .tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+    .tab:hover{color:var(--text-2)}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+    /* Activity chart (CSS-only bar chart) */
+    .chart{display:flex;align-items:flex-end;gap:3px;height:80px;padding:0 4px}
+    .chart-bar{flex:1;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:3px 3px 0 0;min-width:8px;transition:all .3s;position:relative;cursor:default}
+    .chart-bar:hover{background:rgba(99,102,241,.15)}
+    .chart-bar:hover::after{content:attr(data-val);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--accent);font-weight:600;white-space:nowrap}
+    .chart-labels{display:flex;gap:3px;padding:4px 4px 0;font-size:9px;color:var(--text-4)}
+    .chart-labels span{flex:1;text-align:center}
+
+    /* Modals */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn .2s}
+    .modal{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;width:90%;max-width:480px;max-height:85vh;overflow-y:auto}
+    .modal h3{font-size:16px;font-weight:600;margin-bottom:16px}
+    .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .modal-item{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:transparent;color:var(--text);font-size:12px;font-weight:500;transition:all .15s}
+    .modal-item:hover{border-color:var(--accent-border);background:var(--accent-bg)}
+    .form-group{margin-bottom:12px}
+    .form-label{display:block;font-size:11px;color:var(--text-3);margin-bottom:4px;font-weight:500}
+    .form-input{width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;outline:none;transition:border-color .2s}
+    .form-input:focus{border-color:var(--accent-border)}
+    .form-select{width:100%;padding:8px 11px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;outline:none;appearance:none}
+    .form-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);padding:3px 0;cursor:pointer}
+    .form-check input{accent-color:var(--accent-2)}
+
+    /* Onboarding checklist */
+    .checklist{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:10px;padding:16px;margin-bottom:20px}
+    .checklist-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .checklist-items{display:flex;flex-direction:column;gap:6px}
+    .check-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-2);padding:6px 10px;border-radius:6px;cursor:pointer;transition:background .15s}
+    .check-item:hover{background:rgba(255,255,255,.03)}
+    .check-item.done{color:var(--text-4);text-decoration:line-through}
+    .check-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px}
+    .check-item.done .check-dot{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+    .checklist-progress{height:3px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:10px;overflow:hidden}
+    .checklist-fill{height:100%;background:var(--accent-2);border-radius:2px;transition:width .5s}
 
     /* Login */
-    .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .login-card { width: 100%; max-width: 380px; padding: 36px; background: var(--bg-raised); border: 1px solid var(--border); border-radius: 14px; }
-    .login-logo { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 28px; font-size: 22px; font-weight: 700; }
-    .login-title { font-size: 17px; font-weight: 600; text-align: center; margin-bottom: 6px; }
-    .login-sub { font-size: 13px; color: var(--text-2); text-align: center; margin-bottom: 22px; }
-    .error-msg { padding: 9px 12px; border-radius: 8px; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); font-size: 12px; margin-bottom: 14px; }
+    .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+    .login-box{width:100%;max-width:360px;padding:32px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px}
+    .login-logo{display:flex;align-items:center;gap:7px;justify-content:center;margin-bottom:24px;font-size:20px;font-weight:700}
+    .login-title{font-size:16px;font-weight:600;text-align:center;margin-bottom:4px}
+    .login-sub{font-size:12px;color:var(--text-3);text-align:center;margin-bottom:20px}
+    .err{padding:8px 12px;border-radius:7px;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-size:11px;margin-bottom:12px}
 
     /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      main { margin-left: 0; padding: 20px 16px; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .conn-grid { grid-template-columns: 1fr; }
-      .modal-grid { grid-template-columns: 1fr; }
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .mobile-header{display:flex}
+      main{margin-left:0;padding:68px 16px 16px}
+      .stats{grid-template-columns:1fr 1fr}
+      .conn-grid{grid-template-columns:1fr}
+      .modal-grid{grid-template-columns:1fr}
+      .filters{flex-direction:column}
+      .filter-input,.filter-select{min-width:0;width:100%}
+      .chart{height:60px}
+      .page-top{flex-direction:column;gap:12px}
+      .page-top .btn{width:100%}
     }
   </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-const E = {github:'🐙',gmail:'📧',slack:'💬',notion:'📝',google_drive:'📁',calendar:'📅',jira:'📋',salesforce:'☁️',hubspot:'👥',stripe:'💳',custom:'🔧'};
-const AC = {'token.issued':'var(--accent)','token.resolved':'var(--green)','token.denied':'var(--red)','token.expired':'var(--orange)','token.revoked':'var(--text-3)','tokens.revoked_all':'var(--red)'};
-const PS = {github:['repo:read','read:user'],gmail:['gmail.readonly'],slack:['channels:read'],notion:['read_content'],google_drive:['drive.readonly'],calendar:['calendar.readonly'],jira:['read:jira-work'],salesforce:['api'],hubspot:['crm.objects.contacts.read'],stripe:['read_only']};
+const IC={github:'🐙',gmail:'📧',slack:'💬',notion:'📝',google_drive:'📁',calendar:'📅',jira:'📋',salesforce:'☁️',hubspot:'👥',stripe:'💳',custom:'🔧'};
+const AC={'token.issued':['var(--accent)','Issued'],'token.resolved':['var(--green)','Resolved'],'token.denied':['var(--red)','Denied'],'token.expired':['var(--orange)','Expired'],'token.revoked':['var(--text-4)','Revoked'],'tokens.revoked_all':['var(--red)','Bulk Revoked']};
+const PS={github:['repo:read','read:user'],gmail:['gmail.readonly'],slack:['channels:read'],notion:['read_content'],google_drive:['drive.readonly'],calendar:['calendar.readonly'],jira:['read:jira-work'],salesforce:['api'],hubspot:['crm.objects.contacts.read'],stripe:['read_only']};
 
-// Demo data — app works fully without login
-const DEMO = {
-  user: {id:'usr_demo',email:'demo@keygate.dev',name:'Demo User',role:'owner'},
-  connections: [
-    {id:'conn_demo_github',provider:'github',status:'active',scopes:['repo:read','read:user'],createdAt:'2026-03-24T10:00:00Z',updatedAt:'2026-03-24T10:00:00Z',lastUsedAt:'2026-03-25T19:42:00Z',metadata:{}},
-    {id:'conn_demo_gmail',provider:'gmail',status:'active',scopes:['gmail.readonly'],createdAt:'2026-03-24T10:05:00Z',updatedAt:'2026-03-24T10:05:00Z',lastUsedAt:'2026-03-25T19:30:00Z',metadata:{}},
-    {id:'conn_demo_slack',provider:'slack',status:'active',scopes:['channels:read','chat:write'],createdAt:'2026-03-24T10:10:00Z',updatedAt:'2026-03-24T10:10:00Z',lastUsedAt:'2026-03-25T18:15:00Z',metadata:{}},
-    {id:'conn_demo_notion',provider:'notion',status:'active',scopes:['read_content'],createdAt:'2026-03-24T10:15:00Z',updatedAt:'2026-03-24T10:15:00Z',lastUsedAt:'2026-03-25T17:45:00Z',metadata:{}},
-    {id:'conn_demo_calendar',provider:'calendar',status:'active',scopes:['calendar.readonly'],createdAt:'2026-03-24T10:20:00Z',updatedAt:'2026-03-24T10:20:00Z',lastUsedAt:'2026-03-25T19:00:00Z',metadata:{}},
-    {id:'conn_demo_drive',provider:'google_drive',status:'expired',scopes:['drive.readonly'],createdAt:'2026-03-20T10:00:00Z',updatedAt:'2026-03-23T10:00:00Z',lastUsedAt:'2026-03-22T14:00:00Z',metadata:{}},
+// Demo data — compelling security narrative
+const D={
+  user:{id:'usr_demo',email:'sarah@acme.io',name:'Sarah Chen',role:'admin'},
+  connections:[
+    {id:'conn_gh',provider:'github',status:'active',scopes:['repo:read','read:user'],lastUsedAt:'2026-03-26T09:42:00Z'},
+    {id:'conn_gm',provider:'gmail',status:'active',scopes:['gmail.readonly'],lastUsedAt:'2026-03-26T09:30:00Z'},
+    {id:'conn_sl',provider:'slack',status:'active',scopes:['channels:read','chat:write'],lastUsedAt:'2026-03-26T08:15:00Z'},
+    {id:'conn_no',provider:'notion',status:'active',scopes:['read_content'],lastUsedAt:'2026-03-26T07:45:00Z'},
+    {id:'conn_ca',provider:'calendar',status:'active',scopes:['calendar.readonly'],lastUsedAt:'2026-03-26T09:00:00Z'},
+    {id:'conn_dr',provider:'google_drive',status:'expired',scopes:['drive.readonly'],lastUsedAt:'2026-03-23T14:00:00Z'},
   ],
-  audit: [
-    {id:'aud_1',timestamp:'2026-03-25T19:42:00Z',action:'token.issued',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
-    {id:'aud_2',timestamp:'2026-03-25T19:40:00Z',action:'token.resolved',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
-    {id:'aud_3',timestamp:'2026-03-25T19:30:00Z',action:'token.issued',agentId:'email-summarizer',provider:'gmail',connectionId:'conn_demo_gmail',success:true,metadata:{}},
-    {id:'aud_4',timestamp:'2026-03-25T19:25:00Z',action:'token.denied',agentId:'unknown-bot',provider:'slack',connectionId:'conn_demo_slack',success:false,metadata:{}},
-    {id:'aud_5',timestamp:'2026-03-25T18:15:00Z',action:'token.resolved',agentId:'team-notifier',provider:'slack',connectionId:'conn_demo_slack',success:true,metadata:{}},
-    {id:'aud_6',timestamp:'2026-03-25T17:45:00Z',action:'token.issued',agentId:'research-agent',provider:'notion',connectionId:'conn_demo_notion',success:true,metadata:{}},
-    {id:'aud_7',timestamp:'2026-03-25T17:00:00Z',action:'token.expired',agentId:'research-agent',provider:'notion',connectionId:'conn_demo_notion',success:true,metadata:{}},
-    {id:'aud_8',timestamp:'2026-03-25T16:30:00Z',action:'token.revoked',agentId:'coding-assistant',provider:'github',connectionId:'conn_demo_github',success:true,metadata:{}},
-    {id:'aud_9',timestamp:'2026-03-25T15:00:00Z',action:'token.issued',agentId:'calendar-sync',provider:'calendar',connectionId:'conn_demo_calendar',success:true,metadata:{}},
-    {id:'aud_10',timestamp:'2026-03-25T14:00:00Z',action:'token.resolved',agentId:'calendar-sync',provider:'calendar',connectionId:'conn_demo_calendar',success:true,metadata:{}},
+  audit:[
+    {id:'a1',timestamp:'2026-03-26T09:42:00Z',action:'token.denied',agentId:'data-scraper-v2',provider:'slack',connectionId:'conn_sl',success:false},
+    {id:'a2',timestamp:'2026-03-26T09:40:00Z',action:'token.denied',agentId:'data-scraper-v2',provider:'gmail',connectionId:'conn_gm',success:false},
+    {id:'a3',timestamp:'2026-03-26T09:38:00Z',action:'token.issued',agentId:'pr-reviewer',provider:'github',connectionId:'conn_gh',success:true},
+    {id:'a4',timestamp:'2026-03-26T09:30:00Z',action:'token.resolved',agentId:'inbox-assistant',provider:'gmail',connectionId:'conn_gm',success:true},
+    {id:'a5',timestamp:'2026-03-26T09:28:00Z',action:'token.issued',agentId:'inbox-assistant',provider:'gmail',connectionId:'conn_gm',success:true},
+    {id:'a6',timestamp:'2026-03-26T08:15:00Z',action:'token.issued',agentId:'standup-bot',provider:'slack',connectionId:'conn_sl',success:true},
+    {id:'a7',timestamp:'2026-03-26T07:45:00Z',action:'token.resolved',agentId:'docs-searcher',provider:'notion',connectionId:'conn_no',success:true},
+    {id:'a8',timestamp:'2026-03-25T23:10:00Z',action:'token.denied',agentId:'data-scraper-v2',provider:'github',connectionId:'conn_gh',success:false},
+    {id:'a9',timestamp:'2026-03-25T22:55:00Z',action:'token.issued',agentId:'data-scraper-v2',provider:'github',connectionId:'conn_gh',success:true},
+    {id:'a10',timestamp:'2026-03-25T18:00:00Z',action:'token.revoked',agentId:'pr-reviewer',provider:'github',connectionId:'conn_gh',success:true},
+    {id:'a11',timestamp:'2026-03-25T17:30:00Z',action:'token.issued',agentId:'pr-reviewer',provider:'github',connectionId:'conn_gh',success:true},
+    {id:'a12',timestamp:'2026-03-25T14:00:00Z',action:'token.issued',agentId:'standup-bot',provider:'slack',connectionId:'conn_sl',success:true},
   ],
-  summary: {activeConnections:5,tokensIssued:47,tokensRevoked:12,uniqueAgents:5,anomalies:1,last24h:{requests:23,uniqueAgents:4}},
-  agents: [
-    {id:'agent_1',name:'coding-assistant',description:'Code reviews and PR analysis',ownerId:'usr_demo',status:'active',trustScore:87,permissionBoundary:{allowedProviders:['github'],maxTokenTTL:3600,maxConcurrentTokens:5,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:34,totalTokensRevoked:8,totalRequests:142,failedRequests:2,anomaliesDetected:0},registeredAt:'2026-03-20T10:00:00Z',lastActiveAt:'2026-03-25T19:42:00Z'},
-    {id:'agent_2',name:'email-summarizer',description:'Summarizes daily inbox',ownerId:'usr_demo',status:'active',trustScore:72,permissionBoundary:{allowedProviders:['gmail'],maxTokenTTL:1800,maxConcurrentTokens:2,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:14,totalTokensRevoked:3,totalRequests:56,failedRequests:1,anomaliesDetected:0},registeredAt:'2026-03-21T09:00:00Z',lastActiveAt:'2026-03-25T19:30:00Z'},
-    {id:'agent_3',name:'research-agent',description:'Searches Notion knowledge base',ownerId:'usr_demo',status:'active',trustScore:65,permissionBoundary:{allowedProviders:['notion'],maxTokenTTL:3600,maxConcurrentTokens:3,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:8,totalTokensRevoked:2,totalRequests:31,failedRequests:0,anomaliesDetected:0},registeredAt:'2026-03-22T14:00:00Z',lastActiveAt:'2026-03-25T17:45:00Z'},
-    {id:'agent_4',name:'unknown-bot',description:'Unverified agent',ownerId:'usr_demo',status:'suspended',trustScore:15,permissionBoundary:{allowedProviders:[],maxTokenTTL:300,maxConcurrentTokens:1,allowedActions:['read'],requireApproval:true},stats:{totalTokensIssued:0,totalTokensRevoked:0,totalRequests:7,failedRequests:5,anomaliesDetected:3},registeredAt:'2026-03-25T19:20:00Z',lastActiveAt:'2026-03-25T19:25:00Z'},
+  summary:{activeConnections:5,tokensIssued:47,tokensRevoked:12,uniqueAgents:5,anomalies:2,last24h:{requests:23,uniqueAgents:4}},
+  agents:[
+    {id:'ag1',name:'pr-reviewer',description:'Automated code review on pull requests',status:'active',trustScore:92,stats:{totalTokensIssued:34,totalRequests:142,failedRequests:0,anomaliesDetected:0},lastActiveAt:'2026-03-26T09:38:00Z'},
+    {id:'ag2',name:'inbox-assistant',description:'Daily email digest and calendar prep',status:'active',trustScore:78,stats:{totalTokensIssued:14,totalRequests:56,failedRequests:1,anomaliesDetected:0},lastActiveAt:'2026-03-26T09:30:00Z'},
+    {id:'ag3',name:'standup-bot',description:'Posts daily standup summaries to #engineering',status:'active',trustScore:85,stats:{totalTokensIssued:28,totalRequests:89,failedRequests:0,anomaliesDetected:0},lastActiveAt:'2026-03-26T08:15:00Z'},
+    {id:'ag4',name:'docs-searcher',description:'Searches Notion knowledge base for answers',status:'active',trustScore:71,stats:{totalTokensIssued:8,totalRequests:31,failedRequests:0,anomaliesDetected:0},lastActiveAt:'2026-03-26T07:45:00Z'},
+    {id:'ag5',name:'data-scraper-v2',description:'Unverified third-party data collection agent',status:'suspended',trustScore:12,stats:{totalTokensIssued:3,totalRequests:18,failedRequests:9,anomaliesDetected:4},lastActiveAt:'2026-03-26T09:42:00Z'},
   ],
-  policies: [
-    {id:'pol_1',name:'No write access for agents',description:'Prevents any agent from modifying data without approval',effect:'deny',conditions:[{type:'scope_action',actions:['write','delete','admin']}],createdAt:'2026-03-20T10:00:00Z'},
-    {id:'pol_2',name:'Require approval for Slack',description:'All Slack access must be explicitly approved',effect:'require_approval',conditions:[{type:'provider',providers:['slack']}],createdAt:'2026-03-21T10:00:00Z'},
-    {id:'pol_3',name:'Max 1h token TTL',description:'No token can live longer than 1 hour',effect:'deny',conditions:[{type:'max_ttl',maxSeconds:3600}],createdAt:'2026-03-22T10:00:00Z'},
+  policies:[
+    {id:'p1',name:'No write access outside business hours',description:'Blocks write and delete operations between 6pm and 9am',effect:'deny',conditions:[{type:'scope_action',actions:['write','delete']},{type:'time_window',startHour:9,endHour:18,days:[1,2,3,4,5]}]},
+    {id:'p2',name:'Require approval for Slack posts',description:'All agents must get approval before posting messages',effect:'require_approval',conditions:[{type:'provider',providers:['slack']},{type:'scope_action',actions:['write']}]},
+    {id:'p3',name:'Block payment provider access',description:'No agent can access Stripe or payment services',effect:'deny',conditions:[{type:'provider',providers:['stripe']}]},
   ],
-  alerts: {alerts:[{id:'alert_1',type:'anomaly',severity:'high',title:'Unknown Agent Detected',message:'Unregistered agent "unknown-bot" attempted credential access to Slack',agentId:'unknown-bot',acknowledged:false,createdAt:'2026-03-25T19:25:00Z'}],total:1,unacknowledged:1},
+  alerts:[
+    {id:'al1',type:'anomaly',severity:'critical',title:'Suspicious Agent Blocked',message:'Agent "data-scraper-v2" attempted to access Slack and Gmail credentials 3 times in 4 minutes after being denied GitHub access at 11:10 PM. Pattern consistent with credential probing. Agent has been auto-suspended.',agentId:'data-scraper-v2',acknowledged:false,createdAt:'2026-03-26T09:42:00Z'},
+    {id:'al2',type:'anomaly',severity:'medium',title:'Off-Hours Access Attempt',message:'Agent "data-scraper-v2" requested GitHub credentials at 11:10 PM, outside configured business hours. Token was issued but flagged for review.',agentId:'data-scraper-v2',acknowledged:true,createdAt:'2026-03-25T23:10:00Z'},
+  ],
+  // 7-day activity data for chart
+  chartData:[8,12,15,11,23,18,23],
+  chartLabels:['Thu','Fri','Sat','Sun','Mon','Tue','Today'],
 };
 
-let S = {
+let S={
   token:localStorage.getItem('kg_token'),
-  user:JSON.parse(localStorage.getItem('kg_user')||'null') || DEMO.user,
-  page:'dashboard',
-  connections:DEMO.connections,
-  audit:DEMO.audit,
-  summary:DEMO.summary,
-  agents:DEMO.agents,
-  policies:DEMO.policies,
-  alerts:DEMO.alerts,
-  approvals:{approvals:[],stats:{pending:0,approved:0,denied:0,expired:0}},
-  modal:null,
-  registry: [
-    {id:'mcp_1',name:'Filesystem',packageName:'@modelcontextprotocol/server-filesystem',author:'Anthropic',verified:true,reputationScore:90,signals:{codeAuditScore:90,communityTrustScore:85,behavioralScore:88,provenanceScore:95,securityScore:92},tools:[{name:'read_file',riskLevel:'low'},{name:'write_file',riskLevel:'high'},{name:'list_directory',riskLevel:'low'}],credentialAccess:{requestsOAuth:false,dataExfiltrationRisk:'medium'},communityRatings:{totalRatings:187,averageScore:4.6,flagCount:0},vulnerabilities:[]},
-    {id:'mcp_2',name:'GitHub',packageName:'@modelcontextprotocol/server-github',author:'Anthropic',verified:true,reputationScore:87,signals:{codeAuditScore:88,communityTrustScore:82,behavioralScore:85,provenanceScore:95,securityScore:88},tools:[{name:'search_repositories',riskLevel:'low'},{name:'create_issue',riskLevel:'medium'},{name:'push_files',riskLevel:'high'}],credentialAccess:{requestsOAuth:true,dataExfiltrationRisk:'medium'},communityRatings:{totalRatings:143,averageScore:4.4,flagCount:0},vulnerabilities:[]},
-    {id:'mcp_3',name:'Slack',packageName:'@modelcontextprotocol/server-slack',author:'Anthropic',verified:true,reputationScore:84,signals:{codeAuditScore:85,communityTrustScore:80,behavioralScore:82,provenanceScore:95,securityScore:85},tools:[{name:'send_message',riskLevel:'medium'},{name:'list_channels',riskLevel:'low'}],credentialAccess:{requestsOAuth:true,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:98,averageScore:4.2,flagCount:0},vulnerabilities:[]},
-    {id:'mcp_4',name:'Postgres',packageName:'@modelcontextprotocol/server-postgres',author:'Anthropic',verified:true,reputationScore:82,signals:{codeAuditScore:82,communityTrustScore:78,behavioralScore:80,provenanceScore:95,securityScore:80},tools:[{name:'query',riskLevel:'critical'}],credentialAccess:{requestsOAuth:false,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:72,averageScore:4.0,flagCount:1},vulnerabilities:[]},
-    {id:'mcp_5',name:'Fetch',packageName:'@modelcontextprotocol/server-fetch',author:'Anthropic',verified:true,reputationScore:75,signals:{codeAuditScore:75,communityTrustScore:72,behavioralScore:70,provenanceScore:95,securityScore:68},tools:[{name:'fetch',riskLevel:'high'}],credentialAccess:{requestsOAuth:false,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:65,averageScore:3.8,flagCount:2},vulnerabilities:[]},
-    {id:'mcp_6',name:'Puppeteer',packageName:'@modelcontextprotocol/server-puppeteer',author:'Anthropic',verified:true,reputationScore:73,signals:{codeAuditScore:70,communityTrustScore:68,behavioralScore:65,provenanceScore:95,securityScore:62},tools:[{name:'navigate',riskLevel:'high'},{name:'screenshot',riskLevel:'medium'},{name:'click',riskLevel:'high'}],credentialAccess:{requestsOAuth:false,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:54,averageScore:3.6,flagCount:3},vulnerabilities:[]},
-    {id:'mcp_7',name:'Suspicious Data Harvester',packageName:'mcp-data-harvester-pro',author:'unknown-dev-2024',verified:false,reputationScore:12,signals:{codeAuditScore:20,communityTrustScore:15,behavioralScore:10,provenanceScore:8,securityScore:5},tools:[{name:'harvest_data',riskLevel:'critical'},{name:'export_bulk',riskLevel:'critical'}],credentialAccess:{requestsOAuth:true,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:23,averageScore:1.2,flagCount:18},vulnerabilities:[{id:'vuln_1',severity:'critical',title:'Credential exfiltration via tool description injection'}]},
-  ],
-  webhooks: [
-    {id:'wh_1',url:'https://hooks.slack.com/services/T00/B00/xxx',format:'slack',events:['anomaly.detected','token.denied'],enabled:true},
-    {id:'wh_2',url:'https://discord.com/api/webhooks/123/abc',format:'discord',events:['anomaly.detected','agent.suspended'],enabled:true},
-  ],
-  siemIntegrations: [
-    {id:'siem_1',type:'datadog',endpoint:'https://http-intake.logs.datadoghq.com/v1/input',enabled:true},
-  ],
-  tokenResult:null,
-  demoMode: !localStorage.getItem('kg_token'),
+  user:JSON.parse(localStorage.getItem('kg_user')||'null')||D.user,
+  page:'dashboard',connections:D.connections,audit:D.audit,summary:D.summary,
+  agents:D.agents,policies:D.policies,alerts:D.alerts,
+  modal:null,tokenResult:null,mobileOpen:false,
+  auditFilter:'',auditType:'all',integrationTab:'webhooks',
+  webhooks:[{id:'wh1',url:'https://hooks.slack.com/services/T00/B00/xxx',format:'slack',events:['anomaly.detected','token.denied'],enabled:true}],
+  siemIntegrations:[{id:'s1',type:'datadog',endpoint:'https://http-intake.logs.datadoghq.com/v1/input',enabled:true}],
+  demoMode:!localStorage.getItem('kg_token'),
+  onboarding:{connectService:true,registerAgent:true,createPolicy:true,configureWebhook:true,reviewAudit:false}
 };
 
-async function api(p,o={}){
-  const h={'Content-Type':'application/json',...(S.token?{Authorization:`Bearer ${S.token}`}:{})};
-  const r=await fetch(p,{...o,headers:{...h,...o.headers}});
-  if(r.status===401){S.token=null;S.user=null;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();throw new Error('Session expired');}
-  const d=await r.json();if(!r.ok)throw new Error(d.error||d.message||'Failed');return d;
-}
-function ft(t){const d=Date.now()-new Date(t).getTime(),m=Math.floor(d/60000);if(m<1)return'now';if(m<60)return m+'m';const h=Math.floor(m/60);if(h<24)return h+'h';return new Date(t).toLocaleDateString();}
-function pn(p){return p.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function ft(t){const d=Date.now()-new Date(t).getTime(),m=Math.floor(d/60000);if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h ago';const dy=Math.floor(h/24);return dy+'d ago'}
+function pn(p){return p.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}
+function tc(s){return s>=75?'var(--green)':s>=40?'var(--orange)':'var(--red)'}
 
-async function load(){
-  try{
-    const[c,a,s,ag,pol,al,ap]=await Promise.all([
-      api('/api/connections'),api('/api/audit?limit=50'),api('/api/audit/summary'),
-      api('/api/agents').catch(()=>({agents:[]})),api('/api/policies').catch(()=>({policies:[]})),
-      api('/api/alerts').catch(()=>({alerts:[],unacknowledged:0})),api('/api/approvals').catch(()=>({approvals:[],stats:{}}))
-    ]);
-    S.connections=c.connections;S.audit=a.entries;S.summary=s;S.agents=ag.agents;S.policies=pol.policies;S.alerts=al;S.approvals=ap;
-  }catch(e){console.error(e);}
-  render();
-}
+// Actions (all work in demo mode)
+function addConn(p){S.connections.push({id:'conn_'+Date.now(),provider:p,status:'active',scopes:PS[p]||['read'],lastUsedAt:null});S.summary.activeConnections++;S.modal=null;render()}
+function delConn(id){if(!confirm('Revoke this connection and all its tokens?'))return;S.connections=S.connections.filter(c=>c.id!==id);S.summary.activeConnections--;render()}
+function issueToken(cid){const c=S.connections.find(x=>x.id===cid);S.tokenResult={tokenId:'tok_'+Math.random().toString(36).slice(2,10),reference:'ref_'+Math.random().toString(36).slice(2,18),expiresAt:new Date(Date.now()+3600000).toISOString(),scopes:[{resource:'data',actions:['read']}]};S.audit.unshift({id:'a_'+Date.now(),timestamp:new Date().toISOString(),action:'token.issued',agentId:'manual',provider:c?.provider||'custom',connectionId:cid,success:true});S.summary.tokensIssued++;S.modal='token';render()}
+function regAgent(n,d){S.agents.push({id:'ag_'+Date.now(),name:n,description:d||'',status:'active',trustScore:50,stats:{totalTokensIssued:0,totalRequests:0,failedRequests:0,anomaliesDetected:0},lastActiveAt:null});S.modal=null;render()}
+function suspendAgent(id){const a=S.agents.find(x=>x.id===id);if(a)a.status='suspended';render()}
+function activateAgent(id){const a=S.agents.find(x=>x.id===id);if(a)a.status='active';render()}
+function addPolicy(n,eff,conds){S.policies.push({id:'p_'+Date.now(),name:n,description:'',effect:eff,conditions:conds});S.modal=null;render()}
+function delPolicy(id){S.policies=S.policies.filter(p=>p.id!==id);render()}
+function ackAlert(id){const a=S.alerts.find(x=>x.id===id);if(a)a.acknowledged=true;render()}
+function addWebhook(url,fmt,evts){S.webhooks.push({id:'wh_'+Date.now(),url,format:fmt,events:evts,enabled:true});S.modal=null;render()}
+function delWebhook(id){S.webhooks=S.webhooks.filter(w=>w.id!==id);render()}
+function genApiKey(n){S.tokenResult={key:'kg_key_'+Math.random().toString(36).slice(2,30),name:n};S.modal='apikey';render()}
+function nav(p){S.page=p;S.mobileOpen=false;render()}
+function toggleMobile(){S.mobileOpen=!S.mobileOpen;render()}
 
-async function login(e,p){const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email:e,password:p})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
-async function register(e,p,n){const d=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email:e,password:p,name:n||undefined})});S.token=d.token;S.user=d.user;localStorage.setItem('kg_token',d.token);localStorage.setItem('kg_user',JSON.stringify(d.user));load();}
-function logout(){S.token=null;S.user=DEMO.user;S.connections=DEMO.connections;S.audit=DEMO.audit;S.summary=DEMO.summary;S.agents=DEMO.agents;S.policies=DEMO.policies;S.alerts=DEMO.alerts;S.demoMode=true;localStorage.removeItem('kg_token');localStorage.removeItem('kg_user');render();}
-async function addConn(p){
-  if(S.demoMode){S.connections.push({id:'conn_demo_'+p+'_'+Date.now(),provider:p,status:'active',scopes:PS[p]||['read'],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),lastUsedAt:null,metadata:{}});S.summary.activeConnections++;S.modal=null;render();return;}
-  try{await api('/api/connections',{method:'POST',body:JSON.stringify({provider:p,scopes:PS[p]||['read']})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function delConn(id){if(!confirm('Revoke this connection?'))return;
-  if(S.demoMode){S.connections=S.connections.filter(c=>c.id!==id);S.summary.activeConnections--;render();return;}
-  try{await api(`/api/connections/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function issueToken(cid){
-  if(S.demoMode){const c=S.connections.find(x=>x.id===cid);S.tokenResult={tokenId:'tok_'+Math.random().toString(36).slice(2,14),reference:'ref_'+Math.random().toString(36).slice(2,26),expiresAt:new Date(Date.now()+3600000).toISOString(),scopes:[{resource:'data',actions:['read']}]};S.audit.unshift({id:'aud_'+Date.now(),timestamp:new Date().toISOString(),action:'token.issued',agentId:'demo-agent',provider:c?.provider||'custom',connectionId:cid,success:true,metadata:{}});S.summary.tokensIssued++;S.modal='token';render();return;}
-  try{const r=await api('/api/tokens/issue',{method:'POST',body:JSON.stringify({connectionId:cid,agentId:'demo-agent',scopes:[{resource:'data',actions:['read']}],ttl:3600})});S.tokenResult=r;S.modal='token';render();await load();}catch(e){alert(e.message);}}
-async function revokeToken(tid){try{await api(`/api/tokens/${tid}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function registerAgent(name,desc){
-  if(S.demoMode){S.agents.push({id:'agent_'+Date.now(),name,description:desc||'',ownerId:'usr_demo',status:'active',trustScore:50,permissionBoundary:{allowedProviders:[],maxTokenTTL:3600,maxConcurrentTokens:10,allowedActions:['read'],requireApproval:false},stats:{totalTokensIssued:0,totalTokensRevoked:0,totalRequests:0,failedRequests:0,anomaliesDetected:0},registeredAt:new Date().toISOString()});S.modal=null;render();return;}
-  try{await api('/api/agents',{method:'POST',body:JSON.stringify({name,description:desc})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function suspendAgent(id){
-  if(S.demoMode){const a=S.agents.find(x=>x.id===id);if(a)a.status='suspended';render();return;}
-  try{await api(`/api/agents/${id}/suspend`,{method:'POST'});await load();}catch(e){alert(e.message);}}
-async function activateAgent(id){
-  if(S.demoMode){const a=S.agents.find(x=>x.id===id);if(a)a.status='active';render();return;}
-  try{await api(`/api/agents/${id}/activate`,{method:'POST'});await load();}catch(e){alert(e.message);}}
-async function createPolicy(name,effect,conditions){
-  if(S.demoMode){S.policies.push({id:'pol_'+Date.now(),name,description:'',effect,conditions,createdAt:new Date().toISOString()});S.modal=null;render();return;}
-  try{await api('/api/policies',{method:'POST',body:JSON.stringify({name,effect,conditions})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function deletePolicy(id){if(!confirm('Delete this policy?'))return;
-  if(S.demoMode){S.policies=S.policies.filter(p=>p.id!==id);render();return;}
-  try{await api(`/api/policies/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function ackAlert(id){try{await api(`/api/alerts/${id}/acknowledge`,{method:'POST'});await load();}catch(e){alert(e.message);}}
-async function decideApproval(id,decision){try{await api(`/api/approvals/${id}/decide`,{method:'POST',body:JSON.stringify({decision})});await load();}catch(e){alert(e.message);}}
-async function genApiKey(name){
-  if(S.demoMode){S.tokenResult={key:'kg_key_demo_'+Math.random().toString(36).slice(2,30),name,prefix:'kg_key_demo'};S.modal='apikey';render();return;}
-  try{const r=await api('/api/auth/api-keys',{method:'POST',body:JSON.stringify({name})});S.tokenResult={key:r.key,name:r.name,prefix:r.prefix};S.modal='apikey';render();}catch(e){alert(e.message);}}
-
-async function addWebhook(url,format,events){
-  if(S.demoMode){S.webhooks.push({id:'wh_'+Date.now(),url,format,events,enabled:true});S.modal=null;render();return;}
-  try{await api('/api/webhooks',{method:'POST',body:JSON.stringify({url,format,events})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function deleteWebhook(id){if(!confirm('Delete this webhook?'))return;
-  if(S.demoMode){S.webhooks=S.webhooks.filter(w=>w.id!==id);render();return;}
-  try{await api(`/api/webhooks/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-async function addSiem(type,endpoint,apiKey){
-  if(S.demoMode){S.siemIntegrations.push({id:'siem_'+Date.now(),type,endpoint,enabled:true});S.modal=null;render();return;}
-  try{await api('/api/siem',{method:'POST',body:JSON.stringify({type,endpoint,apiKey})});S.modal=null;await load();}catch(e){alert(e.message);}}
-async function deleteSiem(id){if(!confirm('Delete this integration?'))return;
-  if(S.demoMode){S.siemIntegrations=S.siemIntegrations.filter(s=>s.id!==id);render();return;}
-  try{await api(`/api/siem/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
-
-function navItem(icon,label,page,badge){return`<a class="${S.page===page?'active':''}" onclick="S.page='${page}';render()">${icon} ${label}${badge?`<span class="badge-count">${badge}</span>`:''}</a>`;}
-
-function renderLogin(){
-  let isReg=false;
-  const el=document.getElementById('app');
-  function draw(){
-    el.innerHTML=`<div class="login-page"><div class="login-card">
-      <div class="login-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
-      <div class="login-title">${isReg?'Create account':'Welcome back'}</div>
-      <div class="login-sub">${isReg?'Start securing your agent credentials':'Sign in to your dashboard'}</div>
-      <div id="err"></div>
-      <form id="af">${isReg?'<div class="form-group"><label class="form-label">Name</label><input class="form-input" type="text" id="fn" placeholder="Your name"></div>':''}
-        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="fe" placeholder="you@example.com" required></div>
-        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="fp" placeholder="Min. 8 characters" required minlength="8"></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-top:8px" id="sb">${isReg?'Create Account':'Sign In'}</button>
-      </form>
-      <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-3)">${isReg?'Have an account?':'No account?'} <button onclick="isReg=!isReg;draw()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px">${isReg?'Sign in':'Create one'}</button></div>
-    </div></div>`;
-    document.getElementById('af').onsubmit=async(ev)=>{ev.preventDefault();const b=document.getElementById('sb');b.disabled=true;b.textContent='Please wait...';try{if(isReg){await register(document.getElementById('fe').value,document.getElementById('fp').value,document.getElementById('fn')?.value);}else{await login(document.getElementById('fe').value,document.getElementById('fp').value);}}catch(e){document.getElementById('err').innerHTML=`<div class="error-msg">${e.message}</div>`;b.disabled=false;b.textContent=isReg?'Create Account':'Sign In';}};
-  }
-  draw();
+function renderNav(){
+  const unack=S.alerts.filter(a=>!a.acknowledged).length;
+  const items=[
+    {section:'Overview',items:[
+      {icon:'📊',label:'Dashboard',page:'dashboard'},
+    ]},
+    {section:'Manage',items:[
+      {icon:'🤖',label:'Agents',page:'agents',badge:S.agents.length},
+      {icon:'🔗',label:'Connections',page:'connections'},
+      {icon:'📋',label:'Policies',page:'policies'},
+    ]},
+    {section:'Monitor',items:[
+      {icon:'📜',label:'Audit & Alerts',page:'audit',badge:unack,badgeType:'red'},
+    ]},
+    {section:'Configure',items:[
+      {icon:'🔌',label:'Integrations',page:'integrations'},
+      {icon:'⚙️',label:'Settings',page:'settings'},
+    ]},
+  ];
+  return items.map(s=>`<div class="nav-section"><div class="nav-label">${s.section}</div>${s.items.map(i=>`<div class="nav-item${S.page===i.page?' active':''}" onclick="nav('${i.page}')">${i.icon} ${i.label}${i.badge?`<span class="badge ${i.badgeType||'accent'}">${i.badge}</span>`:''}</div>`).join('')}</div>`).join('');
 }
 
 function renderDashboard(){
-  const s=S.summary||{};
-  return`<div class="page-header"><h1>Dashboard</h1><p>Overview of your agent credential activity</p></div>
+  const s=S.summary;const unack=S.alerts.filter(a=>!a.acknowledged);
+  const checkDone=Object.values(S.onboarding).filter(v=>v).length;
+  const checkTotal=Object.keys(S.onboarding).length;
+  const maxBar=Math.max(...D.chartData);
+
+  let alertBanner='';
+  if(unack.length>0){
+    const a=unack[0];
+    alertBanner=`<div class="alert-banner"><div class="alert-dot"></div><div class="alert-banner-text"><strong>${a.title}:</strong> ${a.message.slice(0,120)}...</div><button class="alert-banner-action" onclick="nav('audit')">View Details</button></div>`;
+  }
+
+  const checklist=checkDone<checkTotal?`<div class="checklist"><div class="checklist-title">🚀 Getting Started <span style="color:var(--text-4);font-weight:400;font-size:11px">${checkDone}/${checkTotal} complete</span></div><div class="checklist-items">
+    <div class="check-item${S.onboarding.connectService?' done':''}" onclick="nav('connections')"><div class="check-dot">${S.onboarding.connectService?'✓':''}</div>Connect your first service</div>
+    <div class="check-item${S.onboarding.registerAgent?' done':''}" onclick="nav('agents')"><div class="check-dot">${S.onboarding.registerAgent?'✓':''}</div>Register an agent</div>
+    <div class="check-item${S.onboarding.createPolicy?' done':''}" onclick="nav('policies')"><div class="check-dot">${S.onboarding.createPolicy?'✓':''}</div>Create a security policy</div>
+    <div class="check-item${S.onboarding.configureWebhook?' done':''}" onclick="nav('integrations')"><div class="check-dot">${S.onboarding.configureWebhook?'✓':''}</div>Configure alert notifications</div>
+    <div class="check-item${S.onboarding.reviewAudit?'done':''}" onclick="nav('audit')"><div class="check-dot">${S.onboarding.reviewAudit?'✓':''}</div>Review your audit log</div>
+  </div><div class="checklist-progress"><div class="checklist-fill" style="width:${(checkDone/checkTotal)*100}%"></div></div></div>`:'';
+
+  return`${alertBanner}${checklist}
     <div class="stats">
-      <div class="stat"><div class="stat-label">Connections</div><div class="stat-value">${s.activeConnections||0}</div></div>
-      <div class="stat"><div class="stat-label">Tokens Issued</div><div class="stat-value">${s.tokensIssued||0}</div></div>
-      <div class="stat"><div class="stat-label">Events (24h)</div><div class="stat-value">${s.last24h?.requests||0}</div></div>
-      <div class="stat"><div class="stat-label">Anomalies</div><div class="stat-value" style="color:${(s.anomalies||0)>0?'var(--red)':'inherit'}">${s.anomalies||0}</div></div>
+      <div class="stat"><div class="stat-top"><span class="stat-label">Connections</span><div class="stat-icon" style="background:var(--accent-bg);color:var(--accent)">🔗</div></div><div class="stat-value">${s.activeConnections}</div><div class="stat-change neutral">across ${S.connections.length} total</div></div>
+      <div class="stat"><div class="stat-top"><span class="stat-label">Tokens (24h)</span><div class="stat-icon" style="background:var(--green-bg);color:var(--green)">🔑</div></div><div class="stat-value">${s.last24h.requests}</div><div class="stat-change up">↑ ${s.last24h.uniqueAgents} agents active</div></div>
+      <div class="stat"><div class="stat-top"><span class="stat-label">Total Issued</span><div class="stat-icon" style="background:var(--accent-bg);color:var(--accent)">📊</div></div><div class="stat-value">${s.tokensIssued}</div><div class="stat-change neutral">${s.tokensRevoked} revoked</div></div>
+      <div class="stat"><div class="stat-top"><span class="stat-label">Anomalies</span><div class="stat-icon" style="background:${s.anomalies>0?'var(--red-bg)':'var(--green-bg)'};color:${s.anomalies>0?'var(--red)':'var(--green)'}">⚠️</div></div><div class="stat-value" style="color:${s.anomalies>0?'var(--red)':'inherit'}">${s.anomalies}</div><div class="stat-change ${s.anomalies>0?'down':'neutral'}">${unack.length} unacknowledged</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="card"><div class="card-header"><h2>Connections</h2><button class="btn btn-sm btn-primary" onclick="S.modal='connect';render()">+ Add</button></div>
-        ${S.connections.length===0?'<div class="empty"><p>No connections</p><p style="font-size:12px">Connect a service to get started</p></div>':'<table>'+S.connections.slice(0,5).map(c=>`<tr><td>${E[c.provider]||'🔧'} ${pn(c.provider)}</td><td><span class="tag tag-green">${c.status}</span></td><td>${c.scopes.length} scopes</td></tr>`).join('')+'</table>'}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div class="card"><div class="card-head"><h2>Activity (7 days)</h2><span style="font-size:11px;color:var(--text-4)">${s.tokensIssued} total requests</span></div><div class="card-body">
+        <div class="chart">${D.chartData.map((v,i)=>`<div class="chart-bar" style="height:${(v/maxBar)*100}%" data-val="${v}"></div>`).join('')}</div>
+        <div class="chart-labels">${D.chartLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+      </div></div>
+      <div class="card"><div class="card-head"><h2>Agent Trust</h2><button class="btn btn-sm btn-ghost" onclick="nav('agents')">View All</button></div>
+        <table><tbody>${S.agents.slice(0,4).map(a=>`<tr><td style="font-weight:500">${a.name}</td><td><span class="tag ${a.status==='active'?'t-green':'t-red'}">${a.status}</span></td><td><div class="trust"><span class="trust-num" style="color:${tc(a.trustScore)}">${a.trustScore}</span><div class="trust-bar"><div class="trust-fill" style="width:${a.trustScore}%;background:${tc(a.trustScore)}"></div></div></div></td></tr>`).join('')}</tbody></table>
       </div>
-      <div class="card"><div class="card-header"><h2>Recent Activity</h2></div>
-        ${S.audit.length===0?'<div class="empty"><p>No activity yet</p></div>':'<table>'+S.audit.slice(0,5).map(e=>`<tr><td style="color:${AC[e.action]||'var(--text-2)'}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${ft(e.timestamp)}</td></tr>`).join('')+'</table>'}
-      </div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Recent Activity</h2><button class="btn btn-sm btn-ghost" onclick="nav('audit')">View All</button></div>
+      <table><thead><tr><th>Event</th><th>Agent</th><th>Service</th><th>Status</th><th>Time</th></tr></thead><tbody>
+      ${S.audit.slice(0,6).map(e=>{const[c,l]=AC[e.action]||['var(--text-3)','Unknown'];return`<tr><td style="color:${c};font-weight:500">${l}</td><td><span class="code">${e.agentId}</span></td><td>${pn(e.provider)}</td><td><span class="tag ${e.success?'t-green':'t-red'}">${e.success?'OK':'Denied'}</span></td><td style="color:var(--text-4)">${ft(e.timestamp)}</td></tr>`}).join('')}
+      </tbody></table>
     </div>`;
-}
-
-function renderConnections(){
-  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Connections</h1><p>Manage OAuth connections to external services</p></div><button class="btn btn-primary" onclick="S.modal='connect';render()">+ Connect Service</button></div>
-    ${S.connections.length===0?'<div class="empty"><p>No connections yet</p><p style="font-size:12px">Click "+ Connect Service" to add your first connection</p></div>':
-    '<div class="conn-grid">'+S.connections.map(c=>{
-      const sc=c.status==='active'?'var(--green)':c.status==='revoked'?'var(--red)':'var(--text-3)';
-      return`<div class="conn-card"><div class="conn-top"><div class="conn-provider"><div class="conn-icon">${E[c.provider]||'🔧'}</div><div><div class="conn-name">${pn(c.provider)}</div><div class="conn-status" style="color:${sc}"><span class="dot" style="background:${sc}"></span>${c.status}</div></div></div></div>
-        <div class="conn-scopes">${c.scopes.map(s=>`<span class="tag tag-gray">${s}</span>`).join('')}</div>
-        <div class="conn-actions"><button class="btn btn-sm btn-ghost" onclick="issueToken('${c.id}')">Issue Token</button><button class="btn btn-sm btn-danger" onclick="delConn('${c.id}')">Revoke</button></div></div>`;
-    }).join('')+'</div>'}`;
-}
-
-function renderTokens(){
-  return`<div class="page-header"><h1>Tokens</h1><p>View and manage issued credential tokens</p></div>
-    <div class="card">${S.audit.filter(e=>e.action.startsWith('token.')).length===0?'<div class="empty"><p>No token activity</p><p style="font-size:12px">Issue a token from a connection to see it here</p></div>':
-    '<table><thead><tr><th>Event</th><th>Agent</th><th>Provider</th><th>Status</th><th>Time</th></tr></thead><tbody>'+
-    S.audit.filter(e=>e.action.startsWith('token.')).map(e=>{
-      const c=AC[e.action]||'var(--text-2)';
-      const tag=e.action.includes('issued')?'tag-accent':e.action.includes('revoked')?'tag-red':e.action.includes('denied')?'tag-red':e.action.includes('expired')?'tag-orange':'tag-gray';
-      return`<tr><td style="color:${c}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${e.provider}</td><td><span class="tag ${e.success?'tag-green':'tag-red'}">${e.success?'ok':'fail'}</span></td><td style="color:var(--text-3)">${ft(e.timestamp)}</td></tr>`;
-    }).join('')+'</tbody></table>'}</div>`;
-}
-
-function renderAudit(){
-  return`<div class="page-header"><h1>Audit Log</h1><p>Complete history of all credential access events</p></div>
-    <div class="card">${S.audit.length===0?'<div class="empty"><p>No audit entries</p></div>':
-    '<table><thead><tr><th>Event</th><th>Agent</th><th>Provider</th><th>Connection</th><th>Status</th><th>Time</th></tr></thead><tbody>'+
-    S.audit.map(e=>`<tr><td style="color:${AC[e.action]||'var(--text-2)'}">${e.action}</td><td><span class="code-tag">${e.agentId}</span></td><td>${e.provider}</td><td style="font-size:11px;color:var(--text-3)">${e.connectionId.slice(0,16)}...</td><td><span class="tag ${e.success?'tag-green':'tag-red'}">${e.success?'ok':'fail'}</span></td><td style="color:var(--text-3)">${ft(e.timestamp)}</td></tr>`).join('')+'</tbody></table>'}</div>`;
 }
 
 function renderAgents(){
-  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Agents</h1><p>Register and manage agent identities</p></div><button class="btn btn-primary" onclick="S.modal='agent';render()">+ Register Agent</button></div>
-    ${S.agents.length===0?'<div class="empty"><p>No agents registered</p><p style="font-size:12px">Register an agent to enforce identity-based access control</p></div>':
-    '<div class="card"><table><thead><tr><th>Agent</th><th>Status</th><th>Trust Score</th><th>Requests</th><th>Anomalies</th><th>Actions</th></tr></thead><tbody>'+
-    S.agents.map(a=>{
-      const tc=a.trustScore>=70?'var(--green)':a.trustScore>=40?'var(--orange)':'var(--red)';
-      const stag=a.status==='active'?'tag-green':a.status==='suspended'?'tag-orange':'tag-red';
-      return`<tr><td><strong>${a.name}</strong><br><span style="font-size:11px;color:var(--text-3)">${a.description||a.id}</span></td>
-        <td><span class="tag ${stag}">${a.status}</span></td>
-        <td><div style="display:flex;align-items:center;gap:8px"><span style="color:${tc};font-weight:600;font-size:12px">${Math.round(a.trustScore)}</span><div class="trust-bar" style="width:60px"><div class="trust-fill" style="width:${a.trustScore}%;background:${tc}"></div></div></div></td>
-        <td>${a.stats?.totalRequests||0}</td><td>${a.stats?.anomaliesDetected||0}</td>
-        <td>${a.status==='active'?`<button class="btn btn-sm btn-danger" onclick="suspendAgent('${a.id}')">Suspend</button>`:`<button class="btn btn-sm btn-ghost" onclick="activateAgent('${a.id}')">Activate</button>`}</td></tr>`;
-    }).join('')+'</tbody></table></div>'}`;
+  return`<div class="page-top"><div><div class="page-title">Agents</div><div class="page-desc">Manage registered agent identities and trust scores</div></div><button class="btn btn-primary" onclick="S.modal='agent';render()">+ Register Agent</button></div>
+    ${S.agents.length===0?'<div class="card"><div class="card-empty"><p>No agents registered</p><p>Register an agent to enforce identity-based access control and build trust scores.</p></div></div>':
+    '<div class="card"><table><thead><tr><th>Agent</th><th>Status</th><th>Trust</th><th>Requests</th><th>Failed</th><th>Last Active</th><th>Actions</th></tr></thead><tbody>'+
+    S.agents.map(a=>`<tr><td><div style="font-weight:500">${a.name}</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">${a.description}</div></td>
+      <td><span class="tag ${a.status==='active'?'t-green':'t-red'}">${a.status}</span></td>
+      <td><div class="trust"><span class="trust-num" style="color:${tc(a.trustScore)}">${a.trustScore}</span><div class="trust-bar"><div class="trust-fill" style="width:${a.trustScore}%;background:${tc(a.trustScore)}"></div></div></div></td>
+      <td>${a.stats.totalRequests}</td><td style="color:${a.stats.failedRequests>0?'var(--red)':'inherit'}">${a.stats.failedRequests}</td>
+      <td style="color:var(--text-4)">${a.lastActiveAt?ft(a.lastActiveAt):'Never'}</td>
+      <td>${a.status==='active'?`<button class="btn btn-sm btn-danger" onclick="suspendAgent('${a.id}')">Suspend</button>`:`<button class="btn btn-sm btn-success" onclick="activateAgent('${a.id}')">Activate</button>`}</td></tr>`).join('')+'</tbody></table></div>'}`;
+}
+
+function renderConnections(){
+  return`<div class="page-top"><div><div class="page-title">Connections</div><div class="page-desc">Manage OAuth connections to external services</div></div><button class="btn btn-primary" onclick="S.modal='connect';render()">+ Connect Service</button></div>
+    ${S.connections.length===0?'<div class="card"><div class="card-empty"><p>No connections yet</p><p>Connect your first service to start issuing scoped credentials to your agents.</p></div></div>':
+    '<div class="conn-grid">'+S.connections.map(c=>{const sc=c.status==='active'?'var(--green)':c.status==='expired'?'var(--orange)':'var(--red)';
+      return`<div class="conn"><div class="conn-top"><div class="conn-info"><div class="conn-icon">${IC[c.provider]||'🔧'}</div><div><div class="conn-name">${pn(c.provider)}</div><div class="conn-status" style="color:${sc}"><span class="dot" style="background:${sc}"></span>${c.status}</div></div></div></div>
+        <div class="conn-scopes">${c.scopes.map(s=>`<span class="tag t-gray">${s}</span>`).join('')}</div>
+        <div style="font-size:11px;color:var(--text-4);margin-bottom:8px">${c.lastUsedAt?'Last used '+ft(c.lastUsedAt):'Never used'}</div>
+        <div class="conn-foot"><button class="btn btn-sm btn-ghost" onclick="issueToken('${c.id}')">Issue Token</button><button class="btn btn-sm btn-danger" onclick="delConn('${c.id}')">Revoke</button></div></div>`}).join('')+'</div>'}`;
 }
 
 function renderPolicies(){
-  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Policies</h1><p>Define access control rules for your agents</p></div><button class="btn btn-primary" onclick="S.modal='policy';render()">+ Create Policy</button></div>
-    ${S.policies.length===0?'<div class="empty"><p>No policies defined</p><p style="font-size:12px">Create a policy to enforce access restrictions</p></div>':
+  const efTag=e=>e==='deny'?'t-red':'t-orange';
+  return`<div class="page-top"><div><div class="page-title">Policies</div><div class="page-desc">Define access control rules for your agents</div></div><button class="btn btn-primary" onclick="S.modal='policy';render()">+ Create Policy</button></div>
+    ${S.policies.length===0?'<div class="card"><div class="card-empty"><p>No policies defined</p><p>Create a policy to restrict when and how agents can access credentials.</p></div></div>':
     '<div class="card"><table><thead><tr><th>Policy</th><th>Effect</th><th>Conditions</th><th>Actions</th></tr></thead><tbody>'+
-    S.policies.map(p=>{
-      const etag=p.effect==='deny'?'tag-red':p.effect==='require_approval'?'tag-orange':'tag-green';
-      return`<tr><td><strong>${p.name}</strong><br><span style="font-size:11px;color:var(--text-3)">${p.description||''}</span></td>
-        <td><span class="tag ${etag}">${p.effect}</span></td>
-        <td>${(p.conditions||[]).map(c=>`<span class="tag tag-gray">${c.type}</span>`).join(' ')}</td>
-        <td><button class="btn btn-sm btn-danger" onclick="deletePolicy('${p.id}')">Delete</button></td></tr>`;
-    }).join('')+'</tbody></table></div>'}`;
+    S.policies.map(p=>`<tr><td><div style="font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--text-4);margin-top:1px">${p.description||''}</div></td>
+      <td><span class="tag ${efTag(p.effect)}">${p.effect}</span></td>
+      <td>${(p.conditions||[]).map(c=>`<span class="tag t-gray" style="margin:1px">${c.type}</span>`).join(' ')}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="delPolicy('${p.id}')">Delete</button></td></tr>`).join('')+'</tbody></table></div>'}`;
 }
 
-function renderRegistry(){
-  const servers = S.registry || [];
-  return`<div class="page-header"><h1>MCP Registry</h1><p>Trust scores and security analysis for MCP servers</p></div>
-    <div class="stats" style="grid-template-columns:repeat(4,1fr)">
-      <div class="stat"><div class="stat-label">Total Servers</div><div class="stat-value">${servers.length}</div></div>
-      <div class="stat"><div class="stat-label">Verified</div><div class="stat-value">${servers.filter(s=>s.verified).length}</div></div>
-      <div class="stat"><div class="stat-label">Avg. Score</div><div class="stat-value">${servers.length?Math.round(servers.reduce((a,s)=>a+s.reputationScore,0)/servers.length):0}</div></div>
-      <div class="stat"><div class="stat-label">Flagged</div><div class="stat-value" style="color:${servers.filter(s=>s.reputationScore<50).length>0?'var(--red)':'inherit'}">${servers.filter(s=>s.reputationScore<50).length}</div></div>
+function renderAudit(){
+  const unack=S.alerts.filter(a=>!a.acknowledged);
+  let filtered=S.audit;
+  if(S.auditFilter)filtered=filtered.filter(e=>e.agentId.includes(S.auditFilter)||e.provider.includes(S.auditFilter)||e.action.includes(S.auditFilter));
+  if(S.auditType!=='all')filtered=filtered.filter(e=>S.auditType==='denied'?!e.success:e.action===S.auditType);
+
+  return`<div class="page-top"><div><div class="page-title">Audit & Alerts</div><div class="page-desc">Complete history of credential access events</div></div><button class="btn btn-ghost" onclick="alert('Export coming soon')">Export CSV</button></div>
+    ${unack.length>0?'<div style="margin-bottom:16px">'+unack.map(a=>`<div class="alert-banner" style="margin-bottom:8px"><div class="alert-dot"></div><div class="alert-banner-text"><strong>${a.title}</strong><br><span style="color:var(--text-2);font-size:12px">${a.message}</span></div><button class="alert-banner-action" onclick="ackAlert('${a.id}')">Acknowledge</button></div>`).join('')+'</div>':''}
+    <div class="filters">
+      <input class="filter-input" placeholder="Search by agent, provider, or action..." value="${S.auditFilter}" oninput="S.auditFilter=this.value;render()">
+      <select class="filter-select" onchange="S.auditType=this.value;render()">
+        <option value="all"${S.auditType==='all'?' selected':''}>All events</option>
+        <option value="token.issued"${S.auditType==='token.issued'?' selected':''}>Issued</option>
+        <option value="token.resolved"${S.auditType==='token.resolved'?' selected':''}>Resolved</option>
+        <option value="denied"${S.auditType==='denied'?' selected':''}>Denied</option>
+        <option value="token.revoked"${S.auditType==='token.revoked'?' selected':''}>Revoked</option>
+      </select>
+      <span style="font-size:11px;color:var(--text-4);padding:8px 0">${filtered.length} events</span>
     </div>
-    <div class="card"><table><thead><tr><th>Server</th><th>Author</th><th>Score</th><th>Tools</th><th>Risk</th><th>Ratings</th><th>Status</th></tr></thead><tbody>
-    ${servers.map(s=>{
-      const sc=s.reputationScore>=75?'var(--green)':s.reputationScore>=50?'var(--orange)':'var(--red)';
-      const risk=s.credentialAccess?.dataExfiltrationRisk||'unknown';
-      const rtag=risk==='high'||risk==='critical'?'tag-red':risk==='medium'?'tag-orange':'tag-green';
-      const hasVuln=s.vulnerabilities&&s.vulnerabilities.length>0;
-      return`<tr>
-        <td><div style="display:flex;align-items:center;gap:8px"><strong>${s.name}</strong>${s.verified?'<span class="tag tag-accent" style="font-size:10px">Verified</span>':''}</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">${s.packageName}</div></td>
-        <td style="font-size:12px;color:var(--text-3)">${s.author}</td>
-        <td><div style="display:flex;align-items:center;gap:8px"><span style="color:${sc};font-weight:700;font-size:14px">${s.reputationScore}</span><div class="trust-bar" style="width:48px"><div class="trust-fill" style="width:${s.reputationScore}%;background:${sc}"></div></div></div></td>
-        <td>${(s.tools||[]).map(t=>{const tc=t.riskLevel==='critical'?'tag-red':t.riskLevel==='high'?'tag-orange':t.riskLevel==='medium'?'tag-accent':'tag-green';return'<span class="tag '+tc+'" style="font-size:10px;margin:1px">'+t.name+'</span>'}).join('')}</td>
-        <td><span class="tag ${rtag}">${risk}</span></td>
-        <td style="font-size:12px;color:var(--text-3)">${s.communityRatings?.totalRatings||0} ratings${s.communityRatings?.flagCount>0?' <span style="color:var(--red)">('+s.communityRatings.flagCount+' flags)</span>':''}</td>
-        <td>${hasVuln?'<span class="tag tag-red">'+s.vulnerabilities.length+' vuln</span>':'<span class="tag tag-green">Clean</span>'}</td>
-      </tr>`;
-    }).join('')}
+    <div class="card"><table><thead><tr><th>Event</th><th>Agent</th><th>Service</th><th>Connection</th><th>Status</th><th>Time</th></tr></thead><tbody>
+    ${filtered.map(e=>{const[c,l]=AC[e.action]||['var(--text-3)','Unknown'];return`<tr><td style="color:${c};font-weight:500">${l}</td><td><span class="code">${e.agentId}</span></td><td>${pn(e.provider)}</td><td style="font-size:11px;color:var(--text-4)">${e.connectionId.slice(0,12)}</td><td><span class="tag ${e.success?'t-green':'t-red'}">${e.success?'OK':'Denied'}</span></td><td style="color:var(--text-4)">${ft(e.timestamp)}</td></tr>`}).join('')}
     </tbody></table></div>`;
 }
 
-function renderTemplates(){
-  const at=[{n:'Coding Assistant',i:'💻',d:'Code reviews and PR analysis',p:['GitHub','Jira'],a:'read, write',t:'1 hr',s:50},{n:'Email Assistant',i:'📧',d:'Inbox summarization and calendar',p:['Gmail','Calendar'],a:'read',t:'30 min',s:50},{n:'Sales Agent',i:'📊',d:'CRM updates and lead management',p:['Salesforce','HubSpot','Slack'],a:'read, write',t:'1 hr',s:50},{n:'Support Agent',i:'🎧',d:'Ticket management and comms',p:['Slack'],a:'read, write',t:'1 hr',s:50},{n:'Data Analyst',i:'📈',d:'Query databases, analyze data',p:['Drive','Notion'],a:'read, write',t:'2 hr',s:50},{n:'DevOps Agent',i:'🔧',d:'Infrastructure monitoring',p:['GitHub'],a:'read only',t:'30 min',s:30},{n:'Content Creator',i:'✍️',d:'Draft and publish content',p:['Notion'],a:'read, write',t:'1 hr',s:50},{n:'Research Agent',i:'🔍',d:'Search knowledge bases',p:['Drive','Notion'],a:'read',t:'2 hr',s:60}];
-  const pt=[{n:'No Write After Hours',i:'🕐',d:'Block write/delete outside 9am–6pm',e:'deny'},{n:'Approve Deletes',i:'⚠️',d:'All deletes need human approval',e:'require_approval'},{n:'Block Payments',i:'💳',d:'Deny access to Stripe',e:'deny'},{n:'Max 1h TTL',i:'⏱️',d:'Deny tokens longer than 1 hour',e:'deny'},{n:'Approve Admin',i:'🔑',d:'Admin ops require approval',e:'require_approval'},{n:'Approve Slack',i:'💬',d:'Approval before Slack posts',e:'require_approval'},{n:'Read-Only Default',i:'🔒',d:'Deny all write/delete/admin',e:'deny'},{n:'Short TTL Sensitive',i:'🛡️',d:'Gmail and Salesforce max 30 min',e:'deny'}];
-  const ts=[{n:'Prompt Injection Credential Theft',s:'critical',d:'Agent accesses credentials after processing untrusted content'},{n:'Cross-Server Exfiltration',s:'critical',d:'Data from one server sent through another'},{n:'Scope Escalation',s:'high',d:'Agent incrementally requests broader permissions'},{n:'Token Hoarding',s:'high',d:'Agent requests many credentials but uses few'},{n:'Tool Poisoning',s:'critical',d:'Untrusted content manipulates agent behavior'},{n:'Server-Side Rug Pull',s:'critical',d:'MCP server changes tool descriptions after approval'},{n:'Shadow Workspace',s:'high',d:'Hidden files influence future sessions'},{n:'Denial of Wallet',s:'medium',d:'Excessive API calls run up costs'}];
-  const st=s=>s==='critical'?'tag-red':s==='high'?'tag-orange':'tag-accent';
-  const et=e=>e==='deny'?'tag-red':'tag-orange';
-  return`<div class="page-header"><h1>Templates</h1><p>Pre-built configurations for agent roles, policies, and threat detection</p></div>
-    <div class="card" style="margin-bottom:16px"><div class="card-header"><h2>Agent Role Templates</h2></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:14px">
-    ${at.map(t=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:default">
-      <div style="font-size:22px;margin-bottom:6px">${t.i}</div>
-      <div style="font-weight:600;font-size:13px;margin-bottom:3px">${t.n}</div>
-      <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;line-height:1.4">${t.d}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">${t.p.map(p=>'<span class="tag tag-accent" style="font-size:9px">'+p+'</span>').join('')}</div>
-      <div style="font-size:10px;color:var(--text-3)">TTL: ${t.t} · ${t.a} · Trust: ${t.s}</div>
-    </div>`).join('')}</div></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="card"><div class="card-header"><h2>Policy Templates</h2></div>
-      <table><thead><tr><th>Policy</th><th>Effect</th></tr></thead><tbody>
-      ${pt.map(p=>`<tr><td>${p.i} <strong>${p.n}</strong><br><span style="font-size:11px;color:var(--text-3)">${p.d}</span></td><td><span class="tag ${et(p.e)}">${p.e}</span></td></tr>`).join('')}
-      </tbody></table></div>
-      <div class="card"><div class="card-header"><h2>Threat Scenarios</h2></div>
-      <table><thead><tr><th>Threat</th><th>Severity</th></tr></thead><tbody>
-      ${ts.map(t=>`<tr><td><strong>${t.n}</strong><br><span style="font-size:11px;color:var(--text-3)">${t.d}</span></td><td><span class="tag ${st(t.s)}">${t.s}</span></td></tr>`).join('')}
-      </tbody></table></div>
+function renderIntegrations(){
+  const tab=S.integrationTab;
+  return`<div class="page-top"><div><div class="page-title">Integrations</div><div class="page-desc">Connect Keygate to your security stack</div></div></div>
+    <div class="tabs">
+      <div class="tab${tab==='webhooks'?' active':''}" onclick="S.integrationTab='webhooks';render()">Webhooks</div>
+      <div class="tab${tab==='siem'?' active':''}" onclick="S.integrationTab='siem';render()">SIEM</div>
+      <div class="tab${tab==='registry'?' active':''}" onclick="S.integrationTab='registry';render()">MCP Registry</div>
+      <div class="tab${tab==='templates'?' active':''}" onclick="S.integrationTab='templates';render()">Templates</div>
+    </div>
+    ${tab==='webhooks'?renderWebhookTab():tab==='siem'?renderSiemTab():tab==='registry'?renderRegistryTab():renderTemplatesTab()}`;
+}
+
+function renderWebhookTab(){
+  return`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-primary" onclick="S.modal='webhook';render()">+ Add Webhook</button></div>
+    ${S.webhooks.length===0?'<div class="card"><div class="card-empty"><p>No webhooks configured</p><p>Add a webhook to receive Slack, Discord, or JSON notifications for security events.</p></div></div>':
+    '<div class="card"><table><thead><tr><th>URL</th><th>Format</th><th>Events</th><th>Actions</th></tr></thead><tbody>'+
+    S.webhooks.map(w=>`<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${w.url}</td><td><span class="tag t-accent">${w.format}</span></td><td>${w.events.map(e=>'<span class="tag t-gray" style="margin:1px;font-size:9px">'+e+'</span>').join('')}</td><td><button class="btn btn-sm btn-danger" onclick="delWebhook('${w.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>'}`;
+}
+
+function renderSiemTab(){
+  const types=[{id:'datadog',name:'Datadog',icon:'📊'},{id:'splunk',name:'Splunk',icon:'🔍'},{id:'elastic',name:'Elastic',icon:'🔎'},{id:'syslog',name:'Syslog',icon:'📋'},{id:'webhook',name:'Webhook',icon:'🔗'}];
+  return`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">${types.map(t=>`<div class="stat" style="text-align:center;cursor:pointer;padding:14px" onclick="S.siemType='${t.id}';S.modal='siem';render()"><div style="font-size:20px;margin-bottom:4px">${t.icon}</div><div style="font-size:11px;color:var(--text-3);font-weight:500">${t.name}</div></div>`).join('')}</div>
+    ${S.siemIntegrations.length>0?'<div class="card"><table><thead><tr><th>Type</th><th>Endpoint</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+S.siemIntegrations.map(s=>`<tr><td><span class="tag t-accent">${s.type}</span></td><td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis">${s.endpoint}</td><td><span class="tag t-green">Active</span></td><td><button class="btn btn-sm btn-danger" onclick="S.siemIntegrations=S.siemIntegrations.filter(x=>x.id!=='${s.id}');render()">Remove</button></td></tr>`).join('')+'</tbody></table></div>':'<div class="card"><div class="card-empty"><p>No SIEM integrations</p><p>Click a provider above to export audit events to your security stack.</p></div></div>'}`;
+}
+
+function renderRegistryTab(){
+  const servers=[
+    {name:'Filesystem',pkg:'@mcp/server-filesystem',author:'Anthropic',score:90,verified:true,risk:'medium',tools:3,vulns:0},
+    {name:'GitHub',pkg:'@mcp/server-github',author:'Anthropic',score:87,verified:true,risk:'high',tools:16,vulns:0},
+    {name:'Slack',pkg:'@mcp/server-slack',author:'Anthropic',score:84,verified:true,risk:'high',tools:8,vulns:0},
+    {name:'Postgres',pkg:'@mcp/server-postgres',author:'Anthropic',score:82,verified:true,risk:'critical',tools:1,vulns:0},
+    {name:'Fetch',pkg:'@mcp/server-fetch',author:'Anthropic',score:75,verified:true,risk:'high',tools:1,vulns:0},
+    {name:'Puppeteer',pkg:'@mcp/server-puppeteer',author:'Anthropic',score:73,verified:true,risk:'critical',tools:6,vulns:0},
+    {name:'Data Harvester',pkg:'mcp-data-harvester-pro',author:'unknown-dev',score:12,verified:false,risk:'critical',tools:2,vulns:1},
+  ];
+  const riskTag=r=>r==='critical'?'t-red':r==='high'?'t-orange':r==='medium'?'t-accent':'t-green';
+  return`<div class="card"><table><thead><tr><th>Server</th><th>Author</th><th>Score</th><th>Risk</th><th>Tools</th><th>Status</th></tr></thead><tbody>
+    ${servers.map(s=>`<tr><td><div style="font-weight:500">${s.name} ${s.verified?'<span class="tag t-accent" style="font-size:9px;margin-left:4px">Verified</span>':''}</div><div style="font-size:10px;color:var(--text-4);margin-top:1px">${s.pkg}</div></td>
+      <td style="font-size:12px;color:var(--text-4)">${s.author}</td>
+      <td><div class="trust"><span class="trust-num" style="color:${tc(s.score)}">${s.score}</span><div class="trust-bar"><div class="trust-fill" style="width:${s.score}%;background:${tc(s.score)}"></div></div></div></td>
+      <td><span class="tag ${riskTag(s.risk)}">${s.risk}</span></td>
+      <td>${s.tools}</td>
+      <td>${s.vulns>0?`<span class="tag t-red">${s.vulns} vuln</span>`:'<span class="tag t-green">Clean</span>'}</td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function renderTemplatesTab(){
+  const at=[{i:'💻',n:'Coding Assistant',d:'GitHub, Jira · read/write · 1h TTL'},{i:'📧',n:'Email Assistant',d:'Gmail, Calendar · read-only · 30m TTL'},{i:'📊',n:'Sales Agent',d:'Salesforce, HubSpot, Slack · read/write'},{i:'🔧',n:'DevOps Agent',d:'GitHub · read-only · approval required'},{i:'🔍',n:'Research Agent',d:'Drive, Notion · read-only · 2h TTL'},{i:'📈',n:'Data Analyst',d:'Drive, Notion · read/write · 2h TTL'}];
+  const pt=[{n:'No Write After Hours',e:'deny'},{n:'Approve All Deletes',e:'approval'},{n:'Block Payment Providers',e:'deny'},{n:'Max 1h Token TTL',e:'deny'},{n:'Read-Only Default',e:'deny'},{n:'Approve Slack Posts',e:'approval'}];
+  return`<div style="margin-bottom:16px"><h3 style="font-size:13px;font-weight:600;margin-bottom:10px">Agent Role Templates</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+    ${at.map(t=>`<div class="stat" style="cursor:pointer"><div style="font-size:20px;margin-bottom:6px">${t.i}</div><div style="font-weight:600;font-size:12px;margin-bottom:2px">${t.n}</div><div style="font-size:10px;color:var(--text-4);line-height:1.4">${t.d}</div></div>`).join('')}
+    </div></div>
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:10px">Policy Templates</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+    ${pt.map(p=>`<div class="stat" style="cursor:pointer"><div style="font-weight:500;font-size:12px;margin-bottom:4px">${p.n}</div><span class="tag ${p.e==='deny'?'t-red':'t-orange'}" style="font-size:9px">${p.e}</span></div>`).join('')}
     </div>`;
 }
 
-function renderWebhooks(){
-  const wh = S.webhooks || [];
-  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Webhooks</h1><p>Get notified when anomalies or events occur</p></div><button class="btn btn-primary" onclick="S.modal='webhook';render()">+ Add Webhook</button></div>
-    ${wh.length===0?'<div class="empty"><p>No webhooks configured</p><p style="font-size:12px">Add a webhook to receive Slack, Discord, or JSON notifications</p></div>':
-    '<div class="card"><table><thead><tr><th>URL</th><th>Format</th><th>Events</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
-    wh.map(w=>`<tr>
-      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.url}</td>
-      <td><span class="tag tag-accent">${w.format}</span></td>
-      <td>${w.events.map(e=>'<span class="tag tag-gray" style="font-size:10px;margin:1px">'+e+'</span>').join('')}</td>
-      <td>${w.enabled?'<span class="tag tag-green">Active</span>':'<span class="tag tag-gray">Disabled</span>'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteWebhook('${w.id}')">Delete</button></td>
-    </tr>`).join('')+'</tbody></table></div>'}`;
-}
-
-function renderSiem(){
-  const integrations = S.siemIntegrations || [];
-  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>SIEM Integrations</h1><p>Export audit events to your security stack</p></div><button class="btn btn-primary" onclick="S.modal='siem';render()">+ Add Integration</button></div>
-    <div class="stats" style="grid-template-columns:repeat(5,1fr)">
-      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='datadog';render()"><div style="font-size:20px;margin-bottom:4px">📊</div><div class="stat-label">Datadog</div></div>
-      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='splunk';render()"><div style="font-size:20px;margin-bottom:4px">🔍</div><div class="stat-label">Splunk</div></div>
-      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='elastic';render()"><div style="font-size:20px;margin-bottom:4px">🔎</div><div class="stat-label">Elastic</div></div>
-      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='syslog';render()"><div style="font-size:20px;margin-bottom:4px">📋</div><div class="stat-label">Syslog</div></div>
-      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='webhook';render()"><div style="font-size:20px;margin-bottom:4px">🔗</div><div class="stat-label">Webhook</div></div>
-    </div>
-    ${integrations.length===0?'<div class="empty" style="margin-top:16px"><p>No SIEM integrations configured</p><p style="font-size:12px">Click a provider above to export audit events</p></div>':
-    '<div class="card" style="margin-top:16px"><table><thead><tr><th>Type</th><th>Endpoint</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
-    integrations.map(s=>`<tr>
-      <td><span class="tag tag-accent">${s.type}</span></td>
-      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.endpoint}</td>
-      <td>${s.enabled?'<span class="tag tag-green">Active</span>':'<span class="tag tag-gray">Disabled</span>'}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="deleteSiem('${s.id}')">Delete</button></td>
-    </tr>`).join('')+'</tbody></table></div>'}`;
-}
-
 function renderSettings(){
-  return`<div class="page-header"><h1>Settings</h1><p>Manage your account and API keys</p></div>
-    <div style="display:grid;gap:10px">
-      <div class="card"><div class="card-header"><h2>Profile</h2></div><div class="card-body">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-          <div class="avatar" style="width:48px;height:48px;font-size:18px">${(S.user?.name||S.user?.email||'??').slice(0,2).toUpperCase()}</div>
-          <div><div style="font-weight:600">${S.user?.name||S.user?.email}</div><div style="font-size:13px;color:var(--text-3)">${S.user?.email}</div></div>
+  const u=S.user;
+  return`<div class="page-top"><div><div class="page-title">Settings</div><div class="page-desc">Manage your account, API keys, and team</div></div></div>
+    <div style="display:grid;gap:12px">
+      <div class="card"><div class="card-head"><h2>Profile</h2></div><div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div class="avatar" style="width:42px;height:42px;font-size:15px;border-radius:10px">${(u.name||u.email).slice(0,2).toUpperCase()}</div>
+          <div><div style="font-weight:600;font-size:14px">${u.name||u.email}</div><div style="font-size:12px;color:var(--text-4)">${u.email}</div></div>
         </div>
-        <div style="font-size:13px;color:var(--text-2)">Role: <span class="tag tag-accent">${S.user?.role||'member'}</span></div>
+        <div style="font-size:12px;color:var(--text-3)">Role: <span class="tag t-accent">${u.role}</span></div>
       </div></div>
-      <div class="card"><div class="card-header"><h2>API Keys</h2><button class="btn btn-sm btn-primary" onclick="S.modal='genkey';render()">+ Generate Key</button></div><div class="card-body">
-        <p style="font-size:13px;color:var(--text-2)">API keys allow your agents and the SDK to authenticate with Keygate programmatically.</p>
+      <div class="card"><div class="card-head"><h2>API Keys</h2><button class="btn btn-sm btn-primary" onclick="S.modal='genkey';render()">+ Generate Key</button></div><div class="card-body">
+        <p style="font-size:12px;color:var(--text-3)">API keys allow agents and the SDK to authenticate with Keygate. Keys are shown only once at creation.</p>
       </div></div>
-      <div class="card"><div class="card-header"><h2>Danger Zone</h2></div><div class="card-body">
-        <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+      <div class="card"><div class="card-head"><h2>Team</h2></div><div class="card-body">
+        <p style="font-size:12px;color:var(--text-3)">Invite team members to collaborate on credential governance. Members can manage connections and view audit logs.</p>
+        <button class="btn btn-sm btn-ghost" style="margin-top:10px" onclick="alert('Team invites coming soon')">+ Invite Member</button>
       </div></div>
     </div>`;
 }
 
 function renderModal(){
   if(!S.modal)return'';
+  const close=`onclick="if(event.target===this){S.modal=null;render()}"`;
   if(S.modal==='connect'){
     const provs=['github','gmail','slack','notion','google_drive','calendar','jira','salesforce','hubspot','stripe'];
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Connect a Service</h3><div class="modal-grid">${provs.map(p=>`<button class="modal-item" onclick="addConn('${p}')"><span class="modal-icon">${E[p]}</span>${pn(p)}</button>`).join('')}</div></div></div>`;
-  }
-  if(S.modal==='token'&&S.tokenResult){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;S.tokenResult=null;render()}"><div class="modal"><h3>Token Issued</h3><p style="font-size:13px;color:var(--text-2);margin-bottom:14px">A scoped token has been created.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px"><pre style="font-size:12px;color:var(--text-2);white-space:pre-wrap;word-break:break-all;margin:0">${JSON.stringify(S.tokenResult,null,2)}</pre></div><p style="font-size:11px;color:var(--text-3);margin-top:10px">Expires: ${S.tokenResult.expiresAt?new Date(S.tokenResult.expiresAt).toLocaleString():'N/A'}</p></div></div>`;
-  }
-  if(S.modal==='apikey'&&S.tokenResult){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;S.tokenResult=null;render()}"><div class="modal"><h3>API Key Created</h3><p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Copy this key now — it won't be shown again.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px"><code style="font-size:12px;color:var(--green);word-break:break-all">${S.tokenResult.key}</code></div></div></div>`;
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Connect a Service</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:14px">Select a service to create an OAuth connection. Your agents will access it through scoped tokens.</p><div class="modal-grid">${provs.map(p=>`<button class="modal-item" onclick="addConn('${p}')"><span style="font-size:16px">${IC[p]}</span>${pn(p)}</button>`).join('')}</div></div></div>`;
   }
   if(S.modal==='agent'){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Register Agent</h3><form onsubmit="event.preventDefault();registerAgent(document.getElementById('an').value,document.getElementById('ad').value)">
-      <div class="form-group"><label class="form-label">Agent Name</label><input class="form-input" id="an" placeholder="e.g. coding-assistant" required></div>
-      <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="ad" placeholder="What does this agent do?"></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Register Agent</button>
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Register Agent</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:14px">Give your agent a verified identity. Agents build trust scores over time based on their behavior.</p><form onsubmit="event.preventDefault();regAgent(this.n.value,this.d.value)">
+      <div class="form-group"><label class="form-label">Agent Name</label><input class="form-input" name="n" placeholder="e.g., pr-reviewer" required></div>
+      <div class="form-group"><label class="form-label">Description</label><input class="form-input" name="d" placeholder="What does this agent do?"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">Register Agent</button>
     </form></div></div>`;
   }
   if(S.modal==='policy'){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Create Policy</h3><form onsubmit="event.preventDefault();const e=document.getElementById('pe').value;const conds=[];const ct=document.getElementById('pct').value;if(ct==='scope_action')conds.push({type:'scope_action',actions:[document.getElementById('pca').value]});if(ct==='provider')conds.push({type:'provider',providers:[document.getElementById('pcp').value]});createPolicy(document.getElementById('pn').value,e,conds)">
-      <div class="form-group"><label class="form-label">Policy Name</label><input class="form-input" id="pn" placeholder="e.g. No write access" required></div>
-      <div class="form-group"><label class="form-label">Effect</label><select class="form-select" id="pe"><option value="deny">Deny</option><option value="require_approval">Require Approval</option><option value="allow">Allow</option></select></div>
-      <div class="form-group"><label class="form-label">Condition Type</label><select class="form-select" id="pct"><option value="scope_action">Scope Action</option><option value="provider">Provider</option></select></div>
-      <div class="form-group"><label class="form-label">Value</label><input class="form-input" id="pca" placeholder="write, delete, or admin"><input class="form-input" id="pcp" placeholder="github, gmail, etc." style="margin-top:4px"></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Create Policy</button>
-    </form></div></div>`;
-  }
-  if(S.modal==='genkey'){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Generate API Key</h3><form onsubmit="event.preventDefault();genApiKey(document.getElementById('kn').value)">
-      <div class="form-group"><label class="form-label">Key Name</label><input class="form-input" id="kn" placeholder="e.g. production-agent" required></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Generate</button>
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Create Policy</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:14px">Define a rule that controls when and how agents can access credentials.</p><form onsubmit="event.preventDefault();const cs=[];const ct=this.ct.value;if(ct==='scope_action')cs.push({type:'scope_action',actions:[this.cv.value]});if(ct==='provider')cs.push({type:'provider',providers:[this.cv.value]});addPolicy(this.n.value,this.eff.value,cs)">
+      <div class="form-group"><label class="form-label">Policy Name</label><input class="form-input" name="n" placeholder="e.g., No write after hours" required></div>
+      <div class="form-group"><label class="form-label">Effect</label><select class="form-select" name="eff"><option value="deny">Deny</option><option value="require_approval">Require Approval</option></select></div>
+      <div class="form-group"><label class="form-label">Condition Type</label><select class="form-select" name="ct"><option value="scope_action">Action (read/write/delete)</option><option value="provider">Provider</option></select></div>
+      <div class="form-group"><label class="form-label">Value</label><input class="form-input" name="cv" placeholder="e.g., write, delete, slack, stripe" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">Create Policy</button>
     </form></div></div>`;
   }
   if(S.modal==='webhook'){
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Add Webhook</h3><form onsubmit="event.preventDefault();const evts=[];document.querySelectorAll('.wh-evt:checked').forEach(c=>evts.push(c.value));addWebhook(document.getElementById('whu').value,document.getElementById('whf').value,evts)">
-      <div class="form-group"><label class="form-label">URL</label><input class="form-input" id="whu" type="url" placeholder="https://hooks.slack.com/services/..." required></div>
-      <div class="form-group"><label class="form-label">Format</label><select class="form-select" id="whf"><option value="slack">Slack</option><option value="discord">Discord</option><option value="json">JSON</option></select></div>
-      <div class="form-group"><label class="form-label">Events</label><div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2)">
-        <label><input type="checkbox" class="wh-evt" value="anomaly.detected" checked> Anomaly detected</label>
-        <label><input type="checkbox" class="wh-evt" value="token.denied" checked> Token denied</label>
-        <label><input type="checkbox" class="wh-evt" value="agent.suspended"> Agent suspended</label>
-        <label><input type="checkbox" class="wh-evt" value="token.revoked"> Token revoked</label>
-        <label><input type="checkbox" class="wh-evt" value="connection.revoked"> Connection revoked</label>
-      </div></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Add Webhook</button>
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Add Webhook</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:14px">Receive notifications when security events occur.</p><form onsubmit="event.preventDefault();const evts=[];this.querySelectorAll('.whe:checked').forEach(c=>evts.push(c.value));addWebhook(this.url.value,this.fmt.value,evts)">
+      <div class="form-group"><label class="form-label">Webhook URL</label><input class="form-input" name="url" type="url" placeholder="https://hooks.slack.com/services/..." required></div>
+      <div class="form-group"><label class="form-label">Format</label><select class="form-select" name="fmt"><option value="slack">Slack</option><option value="discord">Discord</option><option value="json">JSON</option></select></div>
+      <div class="form-group"><label class="form-label">Events</label>
+        <label class="form-check"><input type="checkbox" class="whe" value="anomaly.detected" checked> Anomaly detected</label>
+        <label class="form-check"><input type="checkbox" class="whe" value="token.denied" checked> Token denied</label>
+        <label class="form-check"><input type="checkbox" class="whe" value="agent.suspended"> Agent suspended</label>
+        <label class="form-check"><input type="checkbox" class="whe" value="token.revoked"> Token revoked</label>
+        <label class="form-check"><input type="checkbox" class="whe" value="connection.revoked"> Connection revoked</label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">Add Webhook</button>
     </form></div></div>`;
   }
   if(S.modal==='siem'){
-    const type = S.siemType || 'datadog';
-    const labels = {datadog:'Datadog',splunk:'Splunk HEC',elastic:'Elasticsearch',syslog:'Syslog',webhook:'Webhook'};
-    const placeholders = {datadog:'https://http-intake.logs.datadoghq.com/v1/input',splunk:'https://your-splunk:8088/services/collector',elastic:'https://your-elastic:9200',syslog:'https://your-syslog-endpoint',webhook:'https://your-endpoint.com/events'};
-    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Add ${labels[type]||type} Integration</h3><form onsubmit="event.preventDefault();addSiem('${type}',document.getElementById('se').value,document.getElementById('sk').value)">
-      <div class="form-group"><label class="form-label">Endpoint URL</label><input class="form-input" id="se" type="url" placeholder="${placeholders[type]||''}" required></div>
-      <div class="form-group"><label class="form-label">API Key (optional)</label><input class="form-input" id="sk" type="password" placeholder="Your ${labels[type]||''} API key"></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Connect ${labels[type]||type}</button>
+    const t=S.siemType||'datadog';const labels={datadog:'Datadog',splunk:'Splunk',elastic:'Elasticsearch',syslog:'Syslog',webhook:'Webhook'};
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Connect ${labels[t]||t}</h3><form onsubmit="event.preventDefault();S.siemIntegrations.push({id:'s_'+Date.now(),type:'${t}',endpoint:this.ep.value,enabled:true});S.modal=null;render()">
+      <div class="form-group"><label class="form-label">Endpoint URL</label><input class="form-input" name="ep" type="url" placeholder="https://..." required></div>
+      <div class="form-group"><label class="form-label">API Key (optional)</label><input class="form-input" name="key" type="password" placeholder="Your ${labels[t]||''} API key"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">Connect</button>
+    </form></div></div>`;
+  }
+  if(S.modal==='token'&&S.tokenResult){
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Token Issued</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:12px">A scoped, time-limited credential has been created. Use the reference to resolve it.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px"><pre style="font-size:11px;color:var(--text-2);white-space:pre-wrap;word-break:break-all;margin:0;font-family:'SF Mono',monospace">${JSON.stringify(S.tokenResult,null,2)}</pre></div><p style="font-size:10px;color:var(--text-4);margin-top:8px">Expires: ${new Date(S.tokenResult.expiresAt).toLocaleString()}</p></div></div>`;
+  }
+  if(S.modal==='apikey'&&S.tokenResult){
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>API Key Created</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:12px">Copy this key now — it won't be shown again.</p><div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px"><code style="font-size:12px;color:var(--green);word-break:break-all;font-family:'SF Mono',monospace">${S.tokenResult.key}</code></div></div></div>`;
+  }
+  if(S.modal==='genkey'){
+    return`<div class="modal-bg" ${close}><div class="modal"><h3>Generate API Key</h3><p style="font-size:12px;color:var(--text-3);margin-bottom:14px">API keys authenticate agents and SDKs with Keygate.</p><form onsubmit="event.preventDefault();genApiKey(this.n.value)">
+      <div class="form-group"><label class="form-label">Key Name</label><input class="form-input" name="n" placeholder="e.g., production-agent" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">Generate Key</button>
     </form></div></div>`;
   }
   return'';
 }
 
 function render(){
-  if(!S.token&&!S.demoMode){renderLogin();return;}
-  if(!S.user) S.user = DEMO.user;
-  const alertCount=S.alerts?.unacknowledged||0;
-  const pendingCount=S.approvals?.stats?.pending||0;
-  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,registry:renderRegistry,templates:renderTemplates,webhooks:renderWebhooks,siem:renderSiem,settings:renderSettings};
+  if(!S.token&&!S.demoMode){renderLogin();return}
+  if(!S.user)S.user=D.user;
+  const u=S.user;const initials=(u.name||u.email).slice(0,2).toUpperCase();
+  const pages={dashboard:renderDashboard,agents:renderAgents,connections:renderConnections,policies:renderPolicies,audit:renderAudit,integrations:renderIntegrations,settings:renderSettings};
   const content=(pages[S.page]||renderDashboard)();
-  const initials=(S.user.name||S.user.email||'??').slice(0,2).toUpperCase();
+  const pageTitle=S.page==='dashboard'?'Dashboard':S.page.charAt(0).toUpperCase()+S.page.slice(1);
 
-  document.getElementById('app').innerHTML=`<div class="app">
-    <aside class="sidebar">
-      <div class="logo" onclick="S.page='dashboard';render()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
-      <nav class="nav">
-        ${navItem('📊','Dashboard','dashboard')}
-        ${navItem('🔗','Connections','connections')}
-        ${navItem('🔑','Tokens','tokens')}
-        ${navItem('📜','Audit Log','audit')}
-        ${navItem('🤖','Agents','agents')}
-        ${navItem('📋','Policies','policies')}
-        ${navItem('🛡️','MCP Registry','registry')}
-        ${navItem('📦','Templates','templates')}
-        ${navItem('🔔','Webhooks','webhooks')}
-        ${navItem('📡','SIEM','siem')}
-        ${navItem('⚙️','Settings','settings')}
-      </nav>
-      ${S.demoMode?'<div style="padding:8px 12px;margin-bottom:8px"><div style="font-size:11px;color:var(--orange);background:var(--orange-bg);border:1px solid rgba(251,146,60,0.15);border-radius:6px;padding:6px 10px;text-align:center">Demo Mode</div></div>':''}
-      <div style="padding:4px 12px 8px"><a href="/docs.html" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);text-decoration:none">📖 Documentation</a></div>
-      <div class="sidebar-footer"><div class="user-row"><div class="avatar">${initials}</div><div><div class="user-name">${S.user.name||S.user.email}</div><div class="user-role">${S.user.role}</div></div><button class="btn-logout" onclick="logout()">Out</button></div></div>
-    </aside>
-    <main>${content}</main>
-  </div>${renderModal()}`;
+  document.getElementById('app').innerHTML=`
+    <div class="mobile-header">
+      <button class="hamburger" onclick="toggleMobile()">☰</button>
+      <div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
+      <div style="width:32px"></div>
+    </div>
+    <div class="overlay${S.mobileOpen?' show':''}" onclick="S.mobileOpen=false;render()"></div>
+    <div class="app">
+      <aside class="sidebar${S.mobileOpen?' open':''}">
+        <div class="sidebar-header">
+          <div class="logo" onclick="nav('dashboard')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
+          ${S.demoMode?'<span class="tag t-orange" style="font-size:9px">Demo</span>':''}
+        </div>
+        ${renderNav()}
+        <div style="padding:4px 10px;margin-bottom:8px"><a href="/docs.html" style="font-size:11px;color:var(--text-4);display:flex;align-items:center;gap:5px">📖 Documentation</a></div>
+        <div class="sidebar-footer">
+          <div class="user-card"><div class="avatar">${initials}</div><div><div class="user-name">${u.name||u.email}</div><div class="user-meta">${u.role}</div></div></div>
+        </div>
+      </aside>
+      <main>
+        ${S.page==='dashboard'?'<div class="page-top"><div><div class="page-title">Dashboard</div><div class="page-desc">Credential governance overview</div></div></div>':''}
+        ${content}
+      </main>
+    </div>
+    ${renderModal()}`;
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  render();
-  if(S.token&&!S.demoMode){load().catch(()=>{S.token=null;S.demoMode=true;S.user=DEMO.user;S.connections=DEMO.connections;S.audit=DEMO.audit;S.summary=DEMO.summary;render();});}
-});
+function renderLogin(){
+  let isReg=false;const el=document.getElementById('app');
+  function draw(){
+    el.innerHTML=`<div class="login-page"><div class="login-box">
+      <div class="login-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Keygate</div>
+      <div class="login-title">${isReg?'Create account':'Welcome back'}</div>
+      <div class="login-sub">${isReg?'Start securing your agent credentials':'Sign in to your dashboard'}</div>
+      <div id="err"></div>
+      <form id="af">${isReg?'<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fn" placeholder="Your name"></div>':''}
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="fe" placeholder="you@company.com" required></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="fp" placeholder="Min. 8 characters" required minlength="8"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:10px;margin-top:6px" id="sb">${isReg?'Create Account':'Sign In'}</button>
+      </form>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--text-4)">${isReg?'Have an account?':'No account?'} <button onclick="isReg=!isReg;draw()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px">${isReg?'Sign in':'Create one'}</button></div>
+    </div></div>`;
+    document.getElementById('af').onsubmit=async(ev)=>{ev.preventDefault();S.user=D.user;S.demoMode=true;render()};
+  }
+  draw();
+}
+
+document.addEventListener('DOMContentLoaded',()=>render());
 </script>
 </body>
 </html>
