@@ -1,75 +1,69 @@
 # Keygate
 
-Credential broker and access control for AI agents.
+**Credential governance for AI agents.**
 
-Keygate sits between your AI agents and the services they access — providing scoped, short-lived tokens with full audit trails and one-click revocation.
+Other tools authenticate agents. Keygate governs what happens after — scoped tokens, anomaly detection, trust scoring, and policy enforcement in real time.
 
-## The Problem
+[![CI](https://github.com/Bij4n/keygate/actions/workflows/ci.yml/badge.svg)](https://github.com/Bij4n/keygate/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-AI agents need access to your accounts (Gmail, GitHub, Slack, etc.) but current approaches give agents broad, persistent access with no visibility or control. A single compromised tool can access everything.
+---
 
-## How It Works
+## Why Keygate
 
-1. **Connect** your accounts through OAuth — once.
-2. **Keygate brokers access** by issuing scoped, short-lived tokens per agent, per tool, per session.
-3. **Monitor and control** through a real-time dashboard showing exactly what each agent is accessing.
+Nearly half of teams still use shared API keys for agent auth. Even those using OAuth hand agents broad, persistent tokens with zero visibility into how they're used. One compromised tool means full account access.
+
+Keygate sits between your agents and the services they access:
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│   Your Agent │────>│   Keygate    │────>│   Gmail      │
-│              │     │   Broker     │     │   GitHub     │
-│  (any agent) │<────│              │<────│   Slack ...  │
-└──────────────┘     └──────────────┘     └──────────────┘
-                           │
-                     ┌─────v─────┐
-                     │ Dashboard │
-                     │ Audit Log │
-                     └───────────┘
+Your Agents  ──>  Keygate Broker  ──>  Your Services
+                       │
+                  Dashboard +
+                  Audit + Alerts
 ```
 
-## Key Features
+- **Scoped tokens** — short-lived, narrowly scoped credentials per agent, per tool
+- **Opaque references** — agents never see raw tokens, preventing context window leaks
+- **Anomaly detection** — velocity spikes, off-hours access, scope escalation, bulk exfiltration
+- **Policy engine** — conditional access rules: time restrictions, scope limits, provider controls
+- **Human-in-the-loop** — high-risk operations require human approval before access is granted
+- **Agent trust scoring** — every agent builds a 0–100 trust score; unknown or misbehaving agents are auto-suspended
+- **MCP Registry** — reputation database for MCP servers with trust scores, vulnerability tracking, and community ratings
+- **Complete audit trail** — every credential use logged; exportable for SOC 2 and GDPR
+- **SIEM integration** — export events to Datadog, Splunk, Elastic, or any webhook
+- **Webhook alerts** — Slack, Discord, and JSON notifications on anomalies
 
-- **Scoped tokens** — agents get the minimum access needed, not your master credentials
-- **Automatic expiry** — tokens expire after a configurable TTL (default: 1 hour)
-- **Opaque references** — agents never see actual credentials, preventing context window leakage
-- **Real-time audit log** — every credential use is logged with agent, tool, action, and timestamp
-- **One-click revocation** — instantly kill any agent's access to any service
-- **MCP integration** — ships as an MCP server for any compatible agent
-- **Team support** — shared vaults with role-based access control
+---
 
 ## Quick Start
 
 ```bash
-# Clone and install
-git clone https://github.com/user/keygate.git
+git clone https://github.com/Bij4n/keygate.git
 cd keygate
-npm install
-
-# Start infrastructure
-docker compose up -d postgres redis
-
-# Configure
-cp .env.example .env
-# Edit .env with your settings
-
-# Run database migrations
-npm run migrate --workspace=packages/server
-
-# Start the server and dashboard
-npm run dev
+npm run init    # installs, builds, runs tests
+npm run demo    # starts the server (in-memory, no DB required)
 ```
+
+Open [http://localhost:3100/preview.html](http://localhost:3100/preview.html) for the dashboard.
+
+---
 
 ## Packages
 
 | Package | Description |
 |---------|-------------|
-| `@keygate/core` | Token broker, encryption, and vault logic |
-| `@keygate/server` | REST API server |
-| `@keygate/dashboard` | Web dashboard for managing connections |
-| `@keygate/mcp` | MCP server for agent integration |
-| `@keygate/sdk` | TypeScript SDK for agent developers |
+| `@keygate/core` | Vault, encryption, anomaly detection, policy engine, agent registry, MCP registry, SIEM export |
+| `@keygate/server` | Express REST API with auth, rate limiting, telemetry, audit logging |
+| `@keygate/dashboard` | Web dashboard with 8 pages (connections, tokens, audit, agents, policies, registry, settings) |
+| `@keygate/mcp` | MCP server — 6 tools for any MCP-compatible agent |
+| `@keygate/sdk` | TypeScript client SDK |
+| `keygate-langchain` | Python SDK with LangChain integration, tool wrapping, and credential provider |
+
+---
 
 ## SDK Usage
+
+### TypeScript
 
 ```typescript
 import { KeygateClient } from '@keygate/sdk';
@@ -79,21 +73,29 @@ const kg = new KeygateClient({
   agentId: 'my-agent',
 });
 
-// Request a scoped token
-const token = await kg.getToken('github', {
-  scopes: ['repo:read'],
-  ttl: '1h',
-});
-
-// Use it
-const response = await fetch('https://api.github.com/user/repos', {
-  headers: { Authorization: `Bearer ${token.accessToken}` },
-});
+const { accessToken } = await kg.getToken('conn_github', [
+  { resource: 'repos', actions: ['read'] },
+]);
 ```
 
-## MCP Integration
+### Python / LangChain
 
-Add Keygate to your MCP config:
+```python
+from keygate_langchain import KeygateCredentialProvider
+
+provider = KeygateCredentialProvider(
+    api_key="kg_key_...",
+    agent_id="my-agent",
+)
+
+with provider.scoped("conn_github", actions=["read"]) as token:
+    response = httpx.get(
+        "https://api.github.com/user/repos",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+```
+
+### MCP Server
 
 ```json
 {
@@ -103,36 +105,117 @@ Add Keygate to your MCP config:
       "args": ["@keygate/mcp"],
       "env": {
         "KEYGATE_API_URL": "http://localhost:3100",
-        "KEYGATE_API_KEY": "your-api-key"
+        "KEYGATE_API_KEY": "kg_key_..."
       }
     }
   }
 }
 ```
 
+---
+
 ## Architecture
 
-Keygate uses envelope encryption for credential storage. Your master credentials are encrypted with a per-connection key, which is itself encrypted with your account's root key. Tokens issued to agents are short-lived derivatives that never expose the underlying credentials.
+Keygate uses envelope encryption. Master credentials are encrypted with per-connection keys, which are encrypted with the account root key. Tokens issued to agents are short-lived derivatives that never expose underlying credentials.
 
 ```
-Root Key (derived from ENCRYPTION_KEY + user salt)
-  └──> Connection Key (per OAuth connection)
-       └──> Stored Credential (encrypted at rest)
-            └──> Scoped Token (short-lived, limited permissions)
+Root Key (ENCRYPTION_KEY + user salt)
+  └─ Connection Key (per OAuth connection)
+       └─ Stored Credential (AES-256-GCM at rest)
+            └─ Scoped Token (short-lived, limited permissions)
 ```
+
+---
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/register` | Create account |
+| `POST /api/auth/login` | Sign in |
+| `POST /api/auth/api-keys` | Generate API key |
+| `GET /api/connections` | List connections |
+| `POST /api/connections` | Create OAuth connection |
+| `POST /api/tokens/issue` | Issue scoped token |
+| `POST /api/tokens/resolve` | Resolve token reference |
+| `DELETE /api/tokens/:id` | Revoke token |
+| `GET /api/audit` | Query audit log |
+| `GET /api/agents` | List registered agents |
+| `POST /api/agents` | Register agent |
+| `GET /api/policies` | List access policies |
+| `POST /api/policies` | Create policy |
+| `GET /api/registry` | Search MCP server registry |
+| `POST /api/registry/:id/rate` | Rate an MCP server |
+| `GET /api/alerts` | View alerts |
+| `POST /api/webhooks` | Configure webhook |
+| `POST /api/siem` | Configure SIEM export |
+
+Full API documentation at [/docs.html](http://localhost:3100/docs.html).
+
+---
+
+## Deployment
+
+### Docker
+
+```bash
+docker build -t keygate .
+docker run -p 3100:3100 keygate
+```
+
+### Fly.io
+
+```bash
+fly launch --name keygate
+fly deploy
+```
+
+### Railway
+
+```bash
+railway up
+```
+
+---
+
+## Full Setup (with PostgreSQL)
+
+```bash
+cp .env.example .env
+# Set ENCRYPTION_KEY and JWT_SECRET
+
+docker compose up -d postgres redis
+npm run migrate --workspace=packages/server
+npm run dev
+```
+
+---
 
 ## Development
 
 ```bash
-# Run tests
-npm test
-
-# Build all packages
-npm run build
-
-# Lint
-npm run lint
+npm run init          # install + build + test
+npm run demo          # start demo server
+npm test              # run all tests
+npm run build         # build all packages
 ```
+
+---
+
+## Security
+
+Keygate is built around the principle that agents are untrusted callers. Security is enforced architecturally, not by prompts.
+
+- AES-256-GCM encryption at rest
+- Scrypt password hashing
+- HMAC-signed OAuth state parameters
+- Per-token derived encryption keys
+- Rate limiting on all endpoints
+- Helmet security headers
+
+See the [security model documentation](http://localhost:3100/docs.html) for details.
+
+---
 
 ## License
 
