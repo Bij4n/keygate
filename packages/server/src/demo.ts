@@ -33,6 +33,7 @@ import { agentsRouter, agentRegistry } from './routes/agents.js';
 import { alertsRouter, addAlert, getUnacknowledgedCount } from './routes/alerts.js';
 import { webhooksRouter, webhookDispatcher } from './routes/webhooks.js';
 import { registryRouter } from './routes/registry.js';
+import { templatesRouter } from './routes/templates.js';
 import { siemRouter, siemExporter } from './routes/siem.js';
 import { telemetry } from './middleware/telemetry.js';
 
@@ -308,6 +309,7 @@ app.use('/api/agents', authenticate, agentsRouter);
 app.use('/api/alerts', authenticate, alertsRouter);
 app.use('/api/webhooks', authenticate, webhooksRouter);
 app.use('/api/registry', registryRouter);  // Public — no auth required
+app.use('/api/templates', templatesRouter);  // Public — templates are reference data
 app.use('/api/siem', authenticate, siemRouter);
 
 // Anomaly analysis hook — runs on every audit entry

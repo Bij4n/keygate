@@ -408,6 +408,34 @@ function renderRegistry(){
     </tbody></table></div>`;
 }
 
+function renderTemplates(){
+  const at=[{n:'Coding Assistant',i:'💻',d:'Code reviews and PR analysis',p:['GitHub','Jira'],a:'read, write',t:'1 hr',s:50},{n:'Email Assistant',i:'📧',d:'Inbox summarization and calendar',p:['Gmail','Calendar'],a:'read',t:'30 min',s:50},{n:'Sales Agent',i:'📊',d:'CRM updates and lead management',p:['Salesforce','HubSpot','Slack'],a:'read, write',t:'1 hr',s:50},{n:'Support Agent',i:'🎧',d:'Ticket management and comms',p:['Slack'],a:'read, write',t:'1 hr',s:50},{n:'Data Analyst',i:'📈',d:'Query databases, analyze data',p:['Drive','Notion'],a:'read, write',t:'2 hr',s:50},{n:'DevOps Agent',i:'🔧',d:'Infrastructure monitoring',p:['GitHub'],a:'read only',t:'30 min',s:30},{n:'Content Creator',i:'✍️',d:'Draft and publish content',p:['Notion'],a:'read, write',t:'1 hr',s:50},{n:'Research Agent',i:'🔍',d:'Search knowledge bases',p:['Drive','Notion'],a:'read',t:'2 hr',s:60}];
+  const pt=[{n:'No Write After Hours',i:'🕐',d:'Block write/delete outside 9am–6pm',e:'deny'},{n:'Approve Deletes',i:'⚠️',d:'All deletes need human approval',e:'require_approval'},{n:'Block Payments',i:'💳',d:'Deny access to Stripe',e:'deny'},{n:'Max 1h TTL',i:'⏱️',d:'Deny tokens longer than 1 hour',e:'deny'},{n:'Approve Admin',i:'🔑',d:'Admin ops require approval',e:'require_approval'},{n:'Approve Slack',i:'💬',d:'Approval before Slack posts',e:'require_approval'},{n:'Read-Only Default',i:'🔒',d:'Deny all write/delete/admin',e:'deny'},{n:'Short TTL Sensitive',i:'🛡️',d:'Gmail and Salesforce max 30 min',e:'deny'}];
+  const ts=[{n:'Prompt Injection Credential Theft',s:'critical',d:'Agent accesses credentials after processing untrusted content'},{n:'Cross-Server Exfiltration',s:'critical',d:'Data from one server sent through another'},{n:'Scope Escalation',s:'high',d:'Agent incrementally requests broader permissions'},{n:'Token Hoarding',s:'high',d:'Agent requests many credentials but uses few'},{n:'Tool Poisoning',s:'critical',d:'Untrusted content manipulates agent behavior'},{n:'Server-Side Rug Pull',s:'critical',d:'MCP server changes tool descriptions after approval'},{n:'Shadow Workspace',s:'high',d:'Hidden files influence future sessions'},{n:'Denial of Wallet',s:'medium',d:'Excessive API calls run up costs'}];
+  const st=s=>s==='critical'?'tag-red':s==='high'?'tag-orange':'tag-accent';
+  const et=e=>e==='deny'?'tag-red':'tag-orange';
+  return`<div class="page-header"><h1>Templates</h1><p>Pre-built configurations for agent roles, policies, and threat detection</p></div>
+    <div class="card" style="margin-bottom:16px"><div class="card-header"><h2>Agent Role Templates</h2></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:14px">
+    ${at.map(t=>`<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:default">
+      <div style="font-size:22px;margin-bottom:6px">${t.i}</div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:3px">${t.n}</div>
+      <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;line-height:1.4">${t.d}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">${t.p.map(p=>'<span class="tag tag-accent" style="font-size:9px">'+p+'</span>').join('')}</div>
+      <div style="font-size:10px;color:var(--text-3)">TTL: ${t.t} · ${t.a} · Trust: ${t.s}</div>
+    </div>`).join('')}</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="card"><div class="card-header"><h2>Policy Templates</h2></div>
+      <table><thead><tr><th>Policy</th><th>Effect</th></tr></thead><tbody>
+      ${pt.map(p=>`<tr><td>${p.i} <strong>${p.n}</strong><br><span style="font-size:11px;color:var(--text-3)">${p.d}</span></td><td><span class="tag ${et(p.e)}">${p.e}</span></td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="card"><div class="card-header"><h2>Threat Scenarios</h2></div>
+      <table><thead><tr><th>Threat</th><th>Severity</th></tr></thead><tbody>
+      ${ts.map(t=>`<tr><td><strong>${t.n}</strong><br><span style="font-size:11px;color:var(--text-3)">${t.d}</span></td><td><span class="tag ${st(t.s)}">${t.s}</span></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+}
+
 function renderWebhooks(){
   const wh = S.webhooks || [];
   return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Webhooks</h1><p>Get notified when anomalies or events occur</p></div><button class="btn btn-primary" onclick="S.modal='webhook';render()">+ Add Webhook</button></div>
@@ -527,7 +555,7 @@ function render(){
   if(!S.user) S.user = DEMO.user;
   const alertCount=S.alerts?.unacknowledged||0;
   const pendingCount=S.approvals?.stats?.pending||0;
-  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,registry:renderRegistry,webhooks:renderWebhooks,siem:renderSiem,settings:renderSettings};
+  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,registry:renderRegistry,templates:renderTemplates,webhooks:renderWebhooks,siem:renderSiem,settings:renderSettings};
   const content=(pages[S.page]||renderDashboard)();
   const initials=(S.user.name||S.user.email||'??').slice(0,2).toUpperCase();
 
@@ -542,6 +570,7 @@ function render(){
         ${navItem('🤖','Agents','agents')}
         ${navItem('📋','Policies','policies')}
         ${navItem('🛡️','MCP Registry','registry')}
+        ${navItem('📦','Templates','templates')}
         ${navItem('🔔','Webhooks','webhooks')}
         ${navItem('📡','SIEM','siem')}
         ${navItem('⚙️','Settings','settings')}

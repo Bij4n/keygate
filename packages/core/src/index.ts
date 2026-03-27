@@ -1,3 +1,20 @@
+export {
+  AGENT_ROLE_TEMPLATES,
+  POLICY_TEMPLATES,
+  MCP_SECURITY_PROFILES,
+  THREAT_SCENARIOS,
+  WEBHOOK_TEMPLATES,
+  getAgentTemplate,
+  getPolicyTemplate,
+  getMcpProfile,
+  getThreatScenario,
+  getWebhookTemplate,
+  type AgentRoleTemplate,
+  type PolicyTemplate,
+  type McpSecurityProfile,
+  type ThreatScenario,
+  type WebhookTemplate as WebhookTemplateType,
+} from './templates.js';
 export { Vault, VaultError, type VaultStore } from './vault.js';
 export { EncryptionService } from './encryption.js';
 export {
