@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keygate — Secure Credential Broker for AI Agents</title>
+  <title>Keygate — Credential Governance for AI Agents</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,352 +11,324 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #09090b; --bg-raised: #111114; --bg-card: #18181b;
-      --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+      --bg: #09090b; --bg-raised: #111114; --bg-card: #16161a;
+      --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.1);
       --text: #fafafa; --text-2: #a1a1aa; --text-3: #71717a;
-      --accent: #818cf8; --accent-2: #6366f1; --accent-bg: rgba(99,102,241,0.08);
-      --accent-border: rgba(99,102,241,0.2);
-      --green: #34d399; --green-bg: rgba(52,211,153,0.06); --green-border: rgba(52,211,153,0.15);
-      --red: #f87171; --red-bg: rgba(248,113,113,0.06); --red-border: rgba(248,113,113,0.15);
+      --accent: #818cf8; --accent-2: #6366f1; --accent-glow: rgba(99,102,241,0.15);
+      --accent-bg: rgba(99,102,241,0.06); --accent-border: rgba(99,102,241,0.15);
+      --green: #34d399; --green-bg: rgba(52,211,153,0.05); --green-border: rgba(52,211,153,0.12);
+      --red: #f87171; --red-bg: rgba(248,113,113,0.05); --red-border: rgba(248,113,113,0.12);
       --orange: #fb923c;
-      --radius: 12px; --radius-lg: 20px;
     }
 
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; line-height: 1.5; }
     a { color: inherit; text-decoration: none; }
-    .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-    /* Glow effects */
-    .glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: 0.15; pointer-events: none; }
-    .glow-1 { background: var(--accent-2); top: -200px; left: 50%; transform: translateX(-50%); }
-    .glow-2 { background: #8b5cf6; bottom: -300px; right: -200px; opacity: 0.08; }
-
-    /* ─── NAV ─── */
-    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(20px); background: rgba(9,9,11,0.8); border-bottom: 1px solid var(--border); }
-    .nav-inner { display: flex; justify-content: space-between; align-items: center; height: 64px; }
-    .nav-logo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; letter-spacing: -0.03em; }
-    .nav-logo svg { flex-shrink: 0; }
-    .nav-links { display: flex; gap: 32px; align-items: center; }
-    .nav-links a { font-size: 14px; color: var(--text-2); transition: color 0.2s; }
+    /* ── NAV ── */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); background: rgba(9,9,11,0.75); border-bottom: 1px solid var(--border); }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; letter-spacing: -0.03em; }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a { font-size: 13px; color: var(--text-3); font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
-    .nav-cta { background: var(--accent-2); color: white !important; padding: 8px 18px; border-radius: 8px; font-weight: 500; font-size: 13px; transition: all 0.2s; }
-    .nav-cta:hover { background: var(--accent); box-shadow: 0 0 20px rgba(99,102,241,0.3); }
-    .nav-mobile { display: none; background: none; border: none; color: var(--text); cursor: pointer; padding: 8px; }
+    .nav-cta { background: var(--accent-2) !important; color: white !important; padding: 7px 16px; border-radius: 7px; font-weight: 600 !important; font-size: 13px !important; transition: all 0.2s; }
+    .nav-cta:hover { background: var(--accent) !important; box-shadow: 0 0 24px var(--accent-glow); }
 
-    /* ─── HERO ─── */
-    .hero { position: relative; padding: 140px 0 80px; text-align: center; overflow: hidden; }
-    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent); font-size: 13px; font-weight: 500; margin-bottom: 28px; }
-    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .hero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 800; line-height: 1.05; letter-spacing: -0.04em; margin-bottom: 24px; }
-    .hero h1 span { background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 50%, var(--accent) 100%); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 4s ease infinite; }
-    @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-    .hero p { font-size: clamp(16px, 2vw, 19px); color: var(--text-2); line-height: 1.65; max-width: 580px; margin: 0 auto 44px; }
-    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-    .btn-primary { background: var(--accent-2); color: white; box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 16px rgba(99,102,241,0.2); }
-    .btn-primary:hover { background: var(--accent); box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 8px 32px rgba(99,102,241,0.3); transform: translateY(-1px); }
-    .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-raised); }
+    /* ── HERO ── */
+    .hero { padding: 152px 0 88px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 640px; height: 640px; border-radius: 50%; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); pointer-events: none; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 100px; background: var(--accent-bg); border: 1px solid var(--accent-border); color: var(--accent); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 28px; }
+    .hero-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .hero h1 { font-size: clamp(38px, 5.5vw, 60px); font-weight: 800; line-height: 1.08; letter-spacing: -0.04em; margin-bottom: 20px; max-width: 720px; margin-left: auto; margin-right: auto; }
+    .hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { font-size: clamp(15px, 1.8vw, 17px); color: var(--text-2); line-height: 1.7; max-width: 520px; margin: 0 auto 40px; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 9px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-primary { background: var(--accent-2); color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(99,102,241,0.2); }
+    .btn-primary:hover { background: var(--accent); box-shadow: 0 4px 24px var(--accent-glow), 0 0 0 1px rgba(99,102,241,0.4); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-outline:hover { color: var(--text); border-color: var(--border-hover); }
+    .btn svg { flex-shrink: 0; }
 
-    /* ─── ARCHITECTURE ─── */
-    .arch { padding: 20px 0 120px; }
-    .arch-flow { display: flex; align-items: center; justify-content: center; gap: 0; position: relative; }
-    .arch-node { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; text-align: center; min-width: 200px; position: relative; z-index: 2; transition: all 0.3s; }
-    .arch-node:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-    .arch-node-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
-    .arch-node-sub { font-size: 13px; color: var(--text-3); line-height: 1.5; }
+    /* ── ARCHITECTURE ── */
+    .arch { padding: 16px 0 104px; }
+    .arch-flow { display: flex; align-items: center; justify-content: center; }
+    .arch-node { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; text-align: center; min-width: 192px; position: relative; z-index: 2; transition: all 0.25s; }
+    .arch-node:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .arch-node-label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .arch-node-desc { font-size: 12px; color: var(--text-3); line-height: 1.5; }
     .arch-node.center { border-color: var(--accent-border); background: var(--accent-bg); }
-    .arch-node.center .arch-node-title { color: var(--accent); }
-    .arch-connector { width: 80px; height: 2px; position: relative; z-index: 1; flex-shrink: 0; }
-    .arch-connector::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, var(--border), var(--accent-2), var(--border)); }
-    .arch-connector .arch-pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); animation: flowRight 2s ease-in-out infinite; }
-    @keyframes flowRight { 0% { left: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
-    .arch-connector:nth-of-type(4) .arch-pulse { animation-delay: 0.5s; }
-    .arch-down { display: flex; flex-direction: column; align-items: center; margin-top: 0; gap: 0; position: relative; }
-    .arch-down-line { width: 2px; height: 48px; background: linear-gradient(180deg, var(--accent-2), var(--green)); position: relative; }
-    .arch-down-line .arch-pulse-down { position: absolute; left: -3px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); animation: flowDown 2s ease-in-out infinite; animation-delay: 1s; }
-    @keyframes flowDown { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: calc(100% - 8px); opacity: 0; } }
+    .arch-node.center .arch-node-label { color: var(--accent); }
+    .arch-line { width: 64px; height: 2px; background: linear-gradient(90deg, var(--border), var(--accent-2), var(--border)); position: relative; flex-shrink: 0; }
+    .arch-line .dot { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); animation: move-right 2.4s ease-in-out infinite; }
+    @keyframes move-right { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
+    .arch-line:nth-of-type(4) .dot { animation-delay: 0.6s; }
+    .arch-vert { display: flex; flex-direction: column; align-items: center; margin-top: 0; }
+    .arch-vert-line { width: 2px; height: 40px; background: linear-gradient(180deg, var(--accent-2), var(--green)); position: relative; }
+    .arch-vert-line .dot { position: absolute; left: -3px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px rgba(52,211,153,0.3); animation: move-down 2.4s ease-in-out infinite 1.2s; }
+    @keyframes move-down { 0% { top: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: calc(100% - 8px); opacity: 0; } }
     .arch-node.bottom { border-color: var(--green-border); background: var(--green-bg); }
-    .arch-node.bottom .arch-node-title { color: var(--green); }
+    .arch-node.bottom .arch-node-label { color: var(--green); }
 
-    /* ─── PROBLEM ─── */
-    .problem { padding: 100px 0; }
-    .section-label { display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
-    .section-title { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.15; }
-    .section-desc { font-size: 17px; color: var(--text-2); line-height: 1.65; max-width: 560px; margin-bottom: 48px; }
-    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .comp-card { border-radius: var(--radius-lg); padding: 36px; }
+    /* ── SECTION SHARED ── */
+    .section { padding: 96px 0; }
+    .section-eyebrow { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    .section-heading { font-size: clamp(26px, 3.5vw, 36px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 14px; }
+    .section-lead { font-size: 16px; color: var(--text-2); line-height: 1.7; max-width: 520px; }
+    .section-center { text-align: center; }
+    .section-center .section-lead { margin: 0 auto; }
+
+    /* ── PROBLEM ── */
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px; }
+    .comp-card { border-radius: 14px; padding: 32px; }
     .comp-card.bad { background: var(--red-bg); border: 1px solid var(--red-border); }
     .comp-card.good { background: var(--green-bg); border: 1px solid var(--green-border); }
-    .comp-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .comp-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
     .comp-card.bad h3 { color: var(--red); }
     .comp-card.good h3 { color: var(--green); }
     .comp-card ul { list-style: none; }
-    .comp-card li { padding: 8px 0; font-size: 14px; color: var(--text-2); display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+    .comp-card li { padding: 7px 0; font-size: 14px; color: var(--text-2); display: flex; align-items: flex-start; gap: 10px; line-height: 1.55; }
     .comp-card li svg { flex-shrink: 0; margin-top: 3px; }
 
-    /* ─── FEATURES ─── */
-    .features { padding: 100px 0; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .feat-card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; transition: all 0.25s; }
-    .feat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-    .feat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; font-size: 20px; }
-    .feat-icon.purple { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.15); }
-    .feat-icon.blue { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.15); }
-    .feat-icon.green { background: var(--green-bg); border: 1px solid var(--green-border); }
-    .feat-icon.orange { background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.15); }
-    .feat-icon.red { background: var(--red-bg); border: 1px solid var(--red-border); }
-    .feat-icon.indigo { background: var(--accent-bg); border: 1px solid var(--accent-border); }
-    .feat-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.01em; }
-    .feat-card p { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+    /* ── FEATURES ── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 48px; }
+    .feat { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: all 0.25s; }
+    .feat:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .feat-icon { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 18px; }
+    .feat-icon.i-purple { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.12); }
+    .feat-icon.i-blue { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.12); }
+    .feat-icon.i-green { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .feat-icon.i-orange { background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.12); }
+    .feat-icon.i-red { background: var(--red-bg); border: 1px solid var(--red-border); }
+    .feat-icon.i-indigo { background: var(--accent-bg); border: 1px solid var(--accent-border); }
+    .feat h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .feat p { font-size: 13px; color: var(--text-3); line-height: 1.6; }
 
-    /* ─── CODE ─── */
-    .code-section { padding: 100px 0; }
-    .code-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
-    .code-block { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-    .code-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    /* ── CODE ── */
+    .code-split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .code-window { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .code-bar { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px; }
+    .code-dot { width: 9px; height: 9px; border-radius: 50%; }
     .code-dot:nth-child(1) { background: #ef4444; } .code-dot:nth-child(2) { background: #f59e0b; } .code-dot:nth-child(3) { background: #22c55e; }
-    .code-filename { margin-left: 12px; font-size: 13px; color: var(--text-3); font-family: 'SF Mono', 'Fira Code', monospace; }
-    .code-block pre { padding: 24px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 1.75; overflow-x: auto; color: var(--text-2); margin: 0; }
-    .k { color: #c792ea; } .f { color: #82aaff; } .s { color: #c3e88d; } .c { color: #546e7a; } .n { color: #f78c6c; }
+    .code-file { margin-left: 10px; font-size: 12px; color: var(--text-3); font-family: 'SF Mono', 'Fira Code', monospace; }
+    .code-window pre { padding: 20px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12.5px; line-height: 1.8; overflow-x: auto; color: var(--text-2); margin: 0; }
+    .k { color: #c792ea; } .f { color: #82aaff; } .s { color: #c3e88d; } .c { color: #545a6a; }
 
-    /* ─── INTEGRATIONS ─── */
-    .integrations { padding: 100px 0; text-align: center; }
-    .provider-row { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 48px; }
-    .prov { width: 80px; height: 80px; border-radius: 16px; background: var(--bg-raised); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
-    .prov:hover { border-color: var(--accent-border); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-    .prov-emoji { font-size: 24px; }
-    .prov-name { font-size: 10px; color: var(--text-3); font-weight: 500; }
+    /* ── PROVIDERS ── */
+    .prov-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 40px; }
+    .prov { width: 72px; height: 72px; border-radius: 14px; background: var(--bg-raised); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
+    .prov:hover { border-color: var(--accent-border); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    .prov span:first-child { font-size: 22px; }
+    .prov span:last-child { font-size: 9px; color: var(--text-3); font-weight: 600; letter-spacing: 0.02em; }
 
-    /* ─── CTA ─── */
-    .final-cta { padding: 60px 0 100px; text-align: center; }
-    .final-cta h2 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; }
-    .final-cta p { color: var(--text-2); font-size: 17px; margin-bottom: 36px; }
+    /* ── CTA ── */
+    .cta-section { padding: 64px 0 96px; text-align: center; position: relative; }
+    .cta-section::before { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); pointer-events: none; }
 
-    /* ─── FOOTER ─── */
-    .footer { border-top: 1px solid var(--border); padding: 32px 0; }
+    /* ── FOOTER ── */
+    .footer { border-top: 1px solid var(--border); padding: 28px 0; }
     .footer-inner { display: flex; justify-content: space-between; align-items: center; }
-    .footer-left { font-size: 13px; color: var(--text-3); display: flex; align-items: center; gap: 8px; }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 13px; color: var(--text-3); transition: color 0.2s; }
-    .footer-links a:hover { color: var(--text-2); }
+    .footer-left { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+    .footer-right { display: flex; gap: 20px; }
+    .footer-right a { font-size: 12px; color: var(--text-3); transition: color 0.15s; }
+    .footer-right a:hover { color: var(--text-2); }
 
-    /* ─── RESPONSIVE ─── */
+    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
       .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .code-wrapper { grid-template-columns: 1fr; }
-      .arch-flow { flex-direction: column; gap: 0; }
-      .arch-connector { width: 2px; height: 48px; }
-      .arch-connector::before { background: linear-gradient(180deg, var(--border), var(--accent-2), var(--border)); }
-      .arch-connector .arch-pulse { animation-name: flowDown; top: 0; left: -3px; }
-      @keyframes flowDown900 { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: calc(100% - 8px); opacity: 0; } }
+      .code-split { grid-template-columns: 1fr; gap: 32px; }
+      .arch-flow { flex-direction: column; }
+      .arch-line { width: 2px; height: 40px; }
+      .arch-line .dot { animation-name: move-down; left: -3px; top: 0; }
     }
     @media (max-width: 640px) {
       .nav-links a:not(.nav-cta) { display: none; }
-      .nav-mobile { display: block; }
       .features-grid { grid-template-columns: 1fr; }
       .comparison { grid-template-columns: 1fr; }
-      .hero { padding: 120px 0 60px; }
-      .hero-btns { flex-direction: column; align-items: center; }
-      .btn { width: 100%; max-width: 300px; justify-content: center; }
-      .feedback-form { flex-direction: column; }
-      .feedback-box { padding: 40px 24px; }
+      .hero { padding: 128px 0 64px; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 280px; justify-content: center; }
       .arch-node { min-width: 0; width: 100%; }
-      .provider-row { gap: 10px; }
-      .prov { width: 64px; height: 64px; border-radius: 12px; }
-      .prov-emoji { font-size: 20px; }
-      .footer-inner { flex-direction: column; gap: 16px; }
-      .section-desc { margin-bottom: 32px; }
+      .prov-row { gap: 8px; }
+      .prov { width: 60px; height: 60px; border-radius: 10px; }
+      .prov span:first-child { font-size: 18px; }
+      .footer-inner { flex-direction: column; gap: 12px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Nav -->
 <nav class="nav">
   <div class="container nav-inner">
     <a href="/" class="nav-logo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       Keygate
     </a>
     <div class="nav-links">
-      <a href="#features">Features</a>
       <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
       <a href="#integrations">Integrations</a>
       <a href="/docs.html">Docs</a>
-      <a href="/preview.html" class="nav-cta">Open Dashboard</a>
+      <a href="/preview.html" class="nav-cta">Dashboard</a>
     </div>
   </div>
 </nav>
 
-<!-- Hero -->
 <section class="hero">
-  <div class="glow glow-1"></div>
   <div class="container">
-    <div class="badge">Open Source Credential Broker</div>
-    <h1>Other tools authenticate agents.<br><span>We govern what happens after.</span></h1>
-    <p>Existing solutions help agents get credentials. Keygate controls what agents do with them — scoped tokens, real-time anomaly detection, trust scoring, and policy enforcement. The security layer that sits between your agents and everything they access.</p>
-    <div class="hero-btns">
-      <a href="/preview.html" class="btn btn-primary">Try the Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      <a href="/preview.html" class="btn btn-secondary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
-        Live Demo
+    <div class="hero-badge">Open-Source Credential Governance</div>
+    <h1>Other tools authenticate agents. <em>We govern what happens after.</em></h1>
+    <p class="hero-sub">Authentication platforms help agents connect to services. Keygate controls what they do next: scoped tokens, behavioral anomaly detection, trust scoring, and policy enforcement in real time.</p>
+    <div class="hero-actions">
+      <a href="/preview.html" class="btn btn-primary">
+        Try the Dashboard
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/Bij4n/keygate" class="btn btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        View Source
       </a>
     </div>
   </div>
 </section>
 
-<!-- Architecture -->
 <section class="arch">
   <div class="container">
     <div class="arch-flow">
       <div class="arch-node">
-        <div class="arch-node-title">Your Agents</div>
-        <div class="arch-node-sub">Claude, GPT, custom<br>Any framework</div>
+        <div class="arch-node-label">Your Agents</div>
+        <div class="arch-node-desc">Claude, GPT, LangChain,<br>CrewAI, or custom</div>
       </div>
-      <div class="arch-connector"><div class="arch-pulse"></div></div>
+      <div class="arch-line"><div class="dot"></div></div>
       <div class="arch-node center">
-        <div class="arch-node-title">Keygate Broker</div>
-        <div class="arch-node-sub">Scoped tokens, policies<br>Trust scoring, anomaly detection</div>
+        <div class="arch-node-label">Keygate</div>
+        <div class="arch-node-desc">Scoped tokens, policies,<br>trust scoring, anomaly detection</div>
       </div>
-      <div class="arch-connector"><div class="arch-pulse"></div></div>
+      <div class="arch-line"><div class="dot"></div></div>
       <div class="arch-node">
-        <div class="arch-node-title">Your Services</div>
-        <div class="arch-node-sub">Gmail, GitHub, Slack<br>Stripe, Jira, ...</div>
+        <div class="arch-node-label">Your Services</div>
+        <div class="arch-node-desc">Gmail, GitHub, Slack,<br>Stripe, Jira, and more</div>
       </div>
     </div>
-    <div class="arch-down">
-      <div class="arch-down-line"><div class="arch-pulse-down"></div></div>
+    <div class="arch-vert">
+      <div class="arch-vert-line"><div class="dot"></div></div>
       <div class="arch-node bottom">
-        <div class="arch-node-title">Dashboard + Audit + Alerts</div>
-        <div class="arch-node-sub">Real-time visibility, anomaly detection, one-click control</div>
+        <div class="arch-node-label">Dashboard, Audit Log, and Alerts</div>
+        <div class="arch-node-desc">Full visibility. One-click revocation. Webhook notifications.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Problem / Solution -->
-<section class="problem" id="how-it-works">
+<section class="section" id="how-it-works">
   <div class="container">
-    <div class="section-label">The Problem</div>
-    <h2 class="section-title">Auth platforms get agents connected. Nobody governs what happens next.</h2>
-    <p class="section-desc">46% of teams still use shared API keys for agent auth. Even those using OAuth hand over broad, persistent tokens with zero visibility into how agents use them. One compromised tool and the attacker gets everything.</p>
+    <div class="section-eyebrow">The Problem</div>
+    <h2 class="section-heading">Authentication platforms get agents connected.<br>Nobody governs what happens next.</h2>
+    <p class="section-lead">Nearly half of teams still use shared API keys for agent auth. Those using OAuth hand agents broad, persistent tokens with no visibility into how they're used. One compromised tool means full account access.</p>
     <div class="comparison">
       <div class="comp-card bad">
-        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg> Auth-Only Solutions</h3>
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          Auth-only solutions
+        </h3>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Broad, persistent tokens — no post-auth governance</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Raw credentials exposed in the agent's context window</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>No visibility into what agents do with credentials</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Can't detect prompt injection or credential abuse</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>One compromised tool = full account takeover</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Broad, persistent tokens with no post-auth governance</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Raw credentials exposed in the agent context window</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>No visibility into what agents do with credentials</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Cannot detect prompt injection or credential abuse</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>One compromised tool means full account takeover</li>
         </ul>
       </div>
       <div class="comp-card good">
-        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Keygate — Auth + Governance</h3>
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Keygate
+        </h3>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Scoped, short-lived tokens — not broad persistent access</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Opaque references — credentials invisible to the agent</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Anomaly detection flags suspicious patterns in real time</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Agent trust scoring — unknown or misbehaving agents auto-suspend</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Policy engine + human-in-the-loop for high-risk operations</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Scoped, short-lived tokens issued per agent, per tool</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Opaque references keep credentials invisible to agents</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Behavioral anomaly detection flags suspicious patterns</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Agent trust scoring with automatic suspension</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Policy engine with human-in-the-loop approvals</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Features -->
-<section class="features" id="features">
-  <div class="container">
-    <div style="text-align:center; margin-bottom: 56px;">
-      <div class="section-label">Beyond Authentication</div>
-      <h2 class="section-title" style="max-width:560px; margin:0 auto">The credential governance layer<br>no one else is building</h2>
-    </div>
+<section class="section" id="features">
+  <div class="container section-center">
+    <div class="section-eyebrow">Capabilities</div>
+    <h2 class="section-heading">The credential governance layer<br>no one else is building.</h2>
+    <p class="section-lead">Nine capabilities that take agent security beyond authentication.</p>
     <div class="features-grid">
-      <div class="feat-card">
-        <div class="feat-icon purple">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <h3>Scoped Tokens</h3>
-        <p>Short-lived, narrowly-scoped credentials per agent per tool. Read-only Gmail for 1 hour, not full account access forever.</p>
+        <p>Short-lived, narrowly scoped credentials per agent and per tool. Read-only Gmail for one hour, not permanent full access.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon red">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <h3>Anomaly Detection</h3>
-        <p>Real-time behavioral analysis detects velocity spikes, off-hours access, scope escalation, and bulk data exfiltration.</p>
+        <p>Real-time analysis of velocity spikes, off-hours access, scope escalation, and bulk data exfiltration attempts.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon indigo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-indigo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg></div>
         <h3>Policy Engine</h3>
-        <p>Define conditional access rules — time restrictions, scope limits, provider controls. Deny or require approval based on your policies.</p>
+        <p>Conditional access rules with time restrictions, scope limits, and provider controls. Deny, allow, or require human approval.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon orange">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-orange"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></div>
         <h3>Human-in-the-Loop</h3>
-        <p>High-risk operations trigger approval requests. You approve or deny before the agent gets access — stops prompt injection cold.</p>
+        <p>High-risk operations trigger approval requests. The agent cannot proceed until a human reviews and authorizes access.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon blue">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7-4"/></svg>
-        </div>
-        <h3>Agent Identity & Trust</h3>
-        <p>Every agent gets a verified identity, permission boundaries, and a trust score. Unknown agents are flagged. Low trust = auto-suspended.</p>
+      <div class="feat">
+        <div class="feat-icon i-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7-4"/></svg></div>
+        <h3>Agent Trust Scoring</h3>
+        <p>Every registered agent builds a trust score from 0 to 100. Unknown or misbehaving agents are flagged and auto-suspended.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon green">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-        </div>
-        <h3>Full Audit Trail</h3>
-        <p>Every credential use is logged — agent, action, timestamp, resource. Exportable for SOC2 and GDPR compliance.</p>
+      <div class="feat">
+        <div class="feat-icon i-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+        <h3>Complete Audit Trail</h3>
+        <p>Every credential use logged with agent identity, action, timestamp, and resource. Exportable for SOC 2 and GDPR compliance.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon purple">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
         <h3>Opaque References</h3>
-        <p>Agents never see real tokens. They get opaque references resolved at execution time, preventing context window credential leaks.</p>
+        <p>Agents receive references, never raw tokens. Credentials are resolved at execution time, preventing context window leaks.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon blue">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-        </div>
+      <div class="feat">
+        <div class="feat-icon i-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
         <h3>MCP Native</h3>
-        <p>Ships as an MCP server with 6 tools. Any MCP-compatible agent can request credentials through Keygate out of the box.</p>
+        <p>Ships as a Model Context Protocol server. Any MCP-compatible agent can request governed credentials out of the box.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon green">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <h3>Teams & RBAC</h3>
-        <p>Shared credential vaults with role-based access control. Set policies for which agents can access what across your organization.</p>
+      <div class="feat">
+        <div class="feat-icon i-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Teams and RBAC</h3>
+        <p>Shared credential vaults with role-based access control. Set organization-wide policies for which agents can access what.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Code -->
-<section class="code-section" id="code">
+<section class="section" id="code">
   <div class="container">
-    <div class="code-wrapper">
+    <div class="code-split">
       <div>
-        <div class="section-label">Developer Experience</div>
-        <h2 class="section-title">Three lines to integrate</h2>
-        <p class="section-desc">Works with any agent framework. TypeScript SDK, Python/LangChain SDK, or MCP server. Your agents get governed credentials without ever seeing the raw tokens.</p>
-        <a href="/preview.html" class="btn btn-primary" style="display:inline-flex">Try the Demo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <div class="section-eyebrow">Developer Experience</div>
+        <h2 class="section-heading">Three lines to integrate.</h2>
+        <p class="section-lead" style="margin-bottom: 28px;">Works with any agent framework. TypeScript SDK, Python SDK with LangChain support, or the MCP server. Agents get governed credentials without seeing raw tokens.</p>
+        <a href="/preview.html" class="btn btn-primary">
+          Try the Demo
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
-      <div class="code-block">
-        <div class="code-header">
+      <div class="code-window">
+        <div class="code-bar">
           <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
-          <span class="code-filename">agent.ts</span>
+          <span class="code-file">agent.ts</span>
         </div>
         <pre><span class="k">import</span> { KeygateClient } <span class="k">from</span> <span class="s">'@keygate/sdk'</span>;
 
@@ -365,69 +337,68 @@
   agentId: <span class="s">'my-agent'</span>,
 });
 
-<span class="c">// Scoped, auto-expiring token</span>
+<span class="c">// Scoped, auto-expiring credential</span>
 <span class="k">const</span> { accessToken } = <span class="k">await</span> kg.<span class="f">getToken</span>(
   <span class="s">'conn_github'</span>,
-  [{ resource: <span class="s">'repos'</span>, actions: [<span class="s">'read'</span>] }]
+  [{ resource: <span class="s">'repos'</span>, actions: [<span class="s">'read'</span>] }],
 );
 
-<span class="c">// Use it — expires in 1 hour</span>
+<span class="c">// Token expires in one hour</span>
 <span class="k">const</span> repos = <span class="k">await</span> <span class="f">fetch</span>(
   <span class="s">'https://api.github.com/user/repos'</span>,
-  { headers: { Authorization: <span class="s">`Bearer ${accessToken}`</span> } }
+  { headers: { Authorization: <span class="s">`Bearer ${accessToken}`</span> } },
 );</pre>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Integrations -->
-<section class="integrations" id="integrations">
-  <div class="container">
-    <div class="section-label">Integrations</div>
-    <h2 class="section-title">Connect anything your agents use</h2>
-    <p class="section-desc" style="margin: 0 auto;">10 providers built in. SDKs for TypeScript, Python, and LangChain. MCP server for any compatible agent. Layers on top of your existing auth stack.</p>
-    <div class="provider-row">
-      <div class="prov"><span class="prov-emoji">🐙</span><span class="prov-name">GitHub</span></div>
-      <div class="prov"><span class="prov-emoji">📧</span><span class="prov-name">Gmail</span></div>
-      <div class="prov"><span class="prov-emoji">💬</span><span class="prov-name">Slack</span></div>
-      <div class="prov"><span class="prov-emoji">📝</span><span class="prov-name">Notion</span></div>
-      <div class="prov"><span class="prov-emoji">📁</span><span class="prov-name">Drive</span></div>
-      <div class="prov"><span class="prov-emoji">📅</span><span class="prov-name">Calendar</span></div>
-      <div class="prov"><span class="prov-emoji">📋</span><span class="prov-name">Jira</span></div>
-      <div class="prov"><span class="prov-emoji">☁️</span><span class="prov-name">Salesforce</span></div>
-      <div class="prov"><span class="prov-emoji">👥</span><span class="prov-name">HubSpot</span></div>
-      <div class="prov"><span class="prov-emoji">💳</span><span class="prov-name">Stripe</span></div>
+<section class="section" id="integrations">
+  <div class="container section-center">
+    <div class="section-eyebrow">Integrations</div>
+    <h2 class="section-heading">Connects to everything your agents use.</h2>
+    <p class="section-lead">Ten providers built in. SDKs for TypeScript, Python, and LangChain. MCP server for any compatible agent framework.</p>
+    <div class="prov-row">
+      <div class="prov"><span>🐙</span><span>GitHub</span></div>
+      <div class="prov"><span>📧</span><span>Gmail</span></div>
+      <div class="prov"><span>💬</span><span>Slack</span></div>
+      <div class="prov"><span>📝</span><span>Notion</span></div>
+      <div class="prov"><span>📁</span><span>Drive</span></div>
+      <div class="prov"><span>📅</span><span>Calendar</span></div>
+      <div class="prov"><span>📋</span><span>Jira</span></div>
+      <div class="prov"><span>☁️</span><span>Salesforce</span></div>
+      <div class="prov"><span>👥</span><span>HubSpot</span></div>
+      <div class="prov"><span>💳</span><span>Stripe</span></div>
     </div>
   </div>
 </section>
 
-<!-- Final CTA -->
-<section class="final-cta">
+<section class="cta-section">
   <div class="container">
-    <h2>Auth gets agents connected. Keygate keeps them in line.</h2>
-    <p>Open source. The credential governance layer for teams that deploy AI agents in production.</p>
-    <div class="hero-btns">
-      <a href="/preview.html" class="btn btn-primary">Try the Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-      <a href="https://github.com/Bij4n/keygate" class="btn btn-secondary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+    <h2 class="section-heading">Authentication gets agents connected.<br>Keygate keeps them governed.</h2>
+    <p class="section-lead" style="margin: 0 auto 32px; text-align: center;">Open source. MIT licensed. The credential governance layer for teams deploying AI agents in production.</p>
+    <div class="hero-actions">
+      <a href="/preview.html" class="btn btn-primary">
+        Try the Dashboard
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="https://github.com/Bij4n/keygate" class="btn btn-outline">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
         Star on GitHub
       </a>
     </div>
   </div>
-  <div class="glow glow-2"></div>
 </section>
 
-<!-- Footer -->
 <footer class="footer">
   <div class="container footer-inner">
     <div class="footer-left">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Keygate &copy; 2026
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Keygate
     </div>
-    <div class="footer-links">
+    <div class="footer-right">
       <a href="https://github.com/Bij4n/keygate">GitHub</a>
-      <a href="#">Documentation</a>
+      <a href="/docs.html">Documentation</a>
       <a href="#">Privacy</a>
       <a href="#">Terms</a>
     </div>
