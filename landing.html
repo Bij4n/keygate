@@ -195,9 +195,9 @@
 <section class="hero">
   <div class="glow glow-1"></div>
   <div class="container">
-    <div class="badge">Now in Early Access</div>
-    <h1>Your agents need access.<br><span>You need control.</span></h1>
-    <p>Keygate is the credential broker that sits between your AI agents and the services they use — issuing scoped, short-lived tokens with full audit trails, anomaly detection, and instant revocation.</p>
+    <div class="badge">Open Source Credential Broker</div>
+    <h1>Other tools authenticate agents.<br><span>We govern what happens after.</span></h1>
+    <p>Existing solutions help agents get credentials. Keygate controls what agents do with them — scoped tokens, real-time anomaly detection, trust scoring, and policy enforcement. The security layer that sits between your agents and everything they access.</p>
     <div class="hero-btns">
       <a href="/preview.html" class="btn btn-primary">Try the Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="/preview.html" class="btn btn-secondary">
@@ -219,7 +219,7 @@
       <div class="arch-connector"><div class="arch-pulse"></div></div>
       <div class="arch-node center">
         <div class="arch-node-title">Keygate Broker</div>
-        <div class="arch-node-sub">Scoped tokens<br>Policy enforcement</div>
+        <div class="arch-node-sub">Scoped tokens, policies<br>Trust scoring, anomaly detection</div>
       </div>
       <div class="arch-connector"><div class="arch-pulse"></div></div>
       <div class="arch-node">
@@ -241,27 +241,27 @@
 <section class="problem" id="how-it-works">
   <div class="container">
     <div class="section-label">The Problem</div>
-    <h2 class="section-title">Agent credentials are a security nightmare</h2>
-    <p class="section-desc">When you give an AI agent access to Gmail, GitHub, or Slack, you hand over a broad, persistent token. One compromised tool and the attacker gets everything.</p>
+    <h2 class="section-title">Auth platforms get agents connected. Nobody governs what happens next.</h2>
+    <p class="section-desc">46% of teams still use shared API keys for agent auth. Even those using OAuth hand over broad, persistent tokens with zero visibility into how agents use them. One compromised tool and the attacker gets everything.</p>
     <div class="comparison">
       <div class="comp-card bad">
-        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg> Without Keygate</h3>
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg> Auth-Only Solutions</h3>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Broad, persistent OAuth tokens shared across all tools</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Raw credentials visible in the agent's context window</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Zero audit trail of what was accessed and when</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>No detection of suspicious access patterns</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Broad, persistent tokens — no post-auth governance</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Raw credentials exposed in the agent's context window</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>No visibility into what agents do with credentials</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>Can't detect prompt injection or credential abuse</li>
           <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>One compromised tool = full account takeover</li>
         </ul>
       </div>
       <div class="comp-card good">
-        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> With Keygate</h3>
+        <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Keygate — Auth + Governance</h3>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Scoped, short-lived tokens per agent per tool</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Opaque references — agents never see real tokens</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Full audit trail with agent, action, timestamp</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Real-time anomaly detection and alerting</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Compromised tool? That token already expired</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Scoped, short-lived tokens — not broad persistent access</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Opaque references — credentials invisible to the agent</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Anomaly detection flags suspicious patterns in real time</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Agent trust scoring — unknown or misbehaving agents auto-suspend</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Policy engine + human-in-the-loop for high-risk operations</li>
         </ul>
       </div>
     </div>
@@ -272,8 +272,8 @@
 <section class="features" id="features">
   <div class="container">
     <div style="text-align:center; margin-bottom: 56px;">
-      <div class="section-label">Features</div>
-      <h2 class="section-title" style="max-width:500px; margin:0 auto">Security infrastructure<br>built for the agent era</h2>
+      <div class="section-label">Beyond Authentication</div>
+      <h2 class="section-title" style="max-width:560px; margin:0 auto">The credential governance layer<br>no one else is building</h2>
     </div>
     <div class="features-grid">
       <div class="feat-card">
@@ -350,7 +350,7 @@
       <div>
         <div class="section-label">Developer Experience</div>
         <h2 class="section-title">Three lines to integrate</h2>
-        <p class="section-desc">Add Keygate to any agent with the TypeScript SDK or connect directly via the MCP server. Your agents get scoped credentials without ever seeing the raw tokens.</p>
+        <p class="section-desc">Works with any agent framework. TypeScript SDK, Python/LangChain SDK, or MCP server. Your agents get governed credentials without ever seeing the raw tokens.</p>
         <a href="/preview.html" class="btn btn-primary" style="display:inline-flex">Try the Demo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       </div>
       <div class="code-block">
@@ -386,7 +386,7 @@
   <div class="container">
     <div class="section-label">Integrations</div>
     <h2 class="section-title">Connect anything your agents use</h2>
-    <p class="section-desc" style="margin: 0 auto;">10 providers built in. OAuth setup takes 30 seconds. Add custom providers with a few lines of config.</p>
+    <p class="section-desc" style="margin: 0 auto;">10 providers built in. SDKs for TypeScript, Python, and LangChain. MCP server for any compatible agent. Layers on top of your existing auth stack.</p>
     <div class="provider-row">
       <div class="prov"><span class="prov-emoji">🐙</span><span class="prov-name">GitHub</span></div>
       <div class="prov"><span class="prov-emoji">📧</span><span class="prov-name">Gmail</span></div>
@@ -405,8 +405,8 @@
 <!-- Final CTA -->
 <section class="final-cta">
   <div class="container">
-    <h2>Stop giving agents your master keys</h2>
-    <p>Open source. Free for individuals. Team plans for growing organizations.</p>
+    <h2>Auth gets agents connected. Keygate keeps them in line.</h2>
+    <p>Open source. The credential governance layer for teams that deploy AI agents in production.</p>
     <div class="hero-btns">
       <a href="/preview.html" class="btn btn-primary">Try the Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="https://github.com/Bij4n/keygate" class="btn btn-secondary">
