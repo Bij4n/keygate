@@ -15,10 +15,10 @@ services:
     ports:
       - "6379:6379"
 
-  server:
+  keygate:
     build:
       context: .
-      dockerfile: packages/server/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "3100:3100"
     environment:
@@ -29,17 +29,6 @@ services:
     depends_on:
       - postgres
       - redis
-
-  dashboard:
-    build:
-      context: .
-      dockerfile: packages/dashboard/Dockerfile
-    ports:
-      - "3200:3000"
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3100
-    depends_on:
-      - server
 
 volumes:
   pgdata:

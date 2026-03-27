@@ -213,10 +213,16 @@ Keygate is built around the principle that agents are untrusted callers. Securit
 - Rate limiting on all endpoints
 - Helmet security headers
 
-See the [security model documentation](http://localhost:3100/docs.html) for details.
+For vulnerability reporting, see [SECURITY.md](SECURITY.md).
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 ---
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE) for details.
