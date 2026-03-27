@@ -39,6 +39,12 @@ export {
   type AgentStats,
 } from './agents.js';
 export {
+  TokenRotationManager,
+  type RotatingToken,
+  type TokenIssuer,
+  type RotationEvent,
+} from './rotation.js';
+export {
   McpRegistry,
   type McpServerEntry,
   type ReputationSignals,

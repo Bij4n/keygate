@@ -202,6 +202,13 @@ let S = {
     {id:'mcp_6',name:'Puppeteer',packageName:'@modelcontextprotocol/server-puppeteer',author:'Anthropic',verified:true,reputationScore:73,signals:{codeAuditScore:70,communityTrustScore:68,behavioralScore:65,provenanceScore:95,securityScore:62},tools:[{name:'navigate',riskLevel:'high'},{name:'screenshot',riskLevel:'medium'},{name:'click',riskLevel:'high'}],credentialAccess:{requestsOAuth:false,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:54,averageScore:3.6,flagCount:3},vulnerabilities:[]},
     {id:'mcp_7',name:'Suspicious Data Harvester',packageName:'mcp-data-harvester-pro',author:'unknown-dev-2024',verified:false,reputationScore:12,signals:{codeAuditScore:20,communityTrustScore:15,behavioralScore:10,provenanceScore:8,securityScore:5},tools:[{name:'harvest_data',riskLevel:'critical'},{name:'export_bulk',riskLevel:'critical'}],credentialAccess:{requestsOAuth:true,dataExfiltrationRisk:'high'},communityRatings:{totalRatings:23,averageScore:1.2,flagCount:18},vulnerabilities:[{id:'vuln_1',severity:'critical',title:'Credential exfiltration via tool description injection'}]},
   ],
+  webhooks: [
+    {id:'wh_1',url:'https://hooks.slack.com/services/T00/B00/xxx',format:'slack',events:['anomaly.detected','token.denied'],enabled:true},
+    {id:'wh_2',url:'https://discord.com/api/webhooks/123/abc',format:'discord',events:['anomaly.detected','agent.suspended'],enabled:true},
+  ],
+  siemIntegrations: [
+    {id:'siem_1',type:'datadog',endpoint:'https://http-intake.logs.datadoghq.com/v1/input',enabled:true},
+  ],
   tokenResult:null,
   demoMode: !localStorage.getItem('kg_token'),
 };
@@ -260,6 +267,19 @@ async function decideApproval(id,decision){try{await api(`/api/approvals/${id}/d
 async function genApiKey(name){
   if(S.demoMode){S.tokenResult={key:'kg_key_demo_'+Math.random().toString(36).slice(2,30),name,prefix:'kg_key_demo'};S.modal='apikey';render();return;}
   try{const r=await api('/api/auth/api-keys',{method:'POST',body:JSON.stringify({name})});S.tokenResult={key:r.key,name:r.name,prefix:r.prefix};S.modal='apikey';render();}catch(e){alert(e.message);}}
+
+async function addWebhook(url,format,events){
+  if(S.demoMode){S.webhooks.push({id:'wh_'+Date.now(),url,format,events,enabled:true});S.modal=null;render();return;}
+  try{await api('/api/webhooks',{method:'POST',body:JSON.stringify({url,format,events})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function deleteWebhook(id){if(!confirm('Delete this webhook?'))return;
+  if(S.demoMode){S.webhooks=S.webhooks.filter(w=>w.id!==id);render();return;}
+  try{await api(`/api/webhooks/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
+async function addSiem(type,endpoint,apiKey){
+  if(S.demoMode){S.siemIntegrations.push({id:'siem_'+Date.now(),type,endpoint,enabled:true});S.modal=null;render();return;}
+  try{await api('/api/siem',{method:'POST',body:JSON.stringify({type,endpoint,apiKey})});S.modal=null;await load();}catch(e){alert(e.message);}}
+async function deleteSiem(id){if(!confirm('Delete this integration?'))return;
+  if(S.demoMode){S.siemIntegrations=S.siemIntegrations.filter(s=>s.id!==id);render();return;}
+  try{await api(`/api/siem/${id}`,{method:'DELETE'});await load();}catch(e){alert(e.message);}}
 
 function navItem(icon,label,page,badge){return`<a class="${S.page===page?'active':''}" onclick="S.page='${page}';render()">${icon} ${label}${badge?`<span class="badge-count">${badge}</span>`:''}</a>`;}
 
@@ -388,6 +408,40 @@ function renderRegistry(){
     </tbody></table></div>`;
 }
 
+function renderWebhooks(){
+  const wh = S.webhooks || [];
+  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>Webhooks</h1><p>Get notified when anomalies or events occur</p></div><button class="btn btn-primary" onclick="S.modal='webhook';render()">+ Add Webhook</button></div>
+    ${wh.length===0?'<div class="empty"><p>No webhooks configured</p><p style="font-size:12px">Add a webhook to receive Slack, Discord, or JSON notifications</p></div>':
+    '<div class="card"><table><thead><tr><th>URL</th><th>Format</th><th>Events</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+    wh.map(w=>`<tr>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.url}</td>
+      <td><span class="tag tag-accent">${w.format}</span></td>
+      <td>${w.events.map(e=>'<span class="tag tag-gray" style="font-size:10px;margin:1px">'+e+'</span>').join('')}</td>
+      <td>${w.enabled?'<span class="tag tag-green">Active</span>':'<span class="tag tag-gray">Disabled</span>'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteWebhook('${w.id}')">Delete</button></td>
+    </tr>`).join('')+'</tbody></table></div>'}`;
+}
+
+function renderSiem(){
+  const integrations = S.siemIntegrations || [];
+  return`<div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start"><div><h1>SIEM Integrations</h1><p>Export audit events to your security stack</p></div><button class="btn btn-primary" onclick="S.modal='siem';render()">+ Add Integration</button></div>
+    <div class="stats" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='datadog';render()"><div style="font-size:20px;margin-bottom:4px">📊</div><div class="stat-label">Datadog</div></div>
+      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='splunk';render()"><div style="font-size:20px;margin-bottom:4px">🔍</div><div class="stat-label">Splunk</div></div>
+      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='elastic';render()"><div style="font-size:20px;margin-bottom:4px">🔎</div><div class="stat-label">Elastic</div></div>
+      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='syslog';render()"><div style="font-size:20px;margin-bottom:4px">📋</div><div class="stat-label">Syslog</div></div>
+      <div class="stat" style="text-align:center;padding:16px 8px;cursor:pointer" onclick="S.modal='siem';S.siemType='webhook';render()"><div style="font-size:20px;margin-bottom:4px">🔗</div><div class="stat-label">Webhook</div></div>
+    </div>
+    ${integrations.length===0?'<div class="empty" style="margin-top:16px"><p>No SIEM integrations configured</p><p style="font-size:12px">Click a provider above to export audit events</p></div>':
+    '<div class="card" style="margin-top:16px"><table><thead><tr><th>Type</th><th>Endpoint</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+    integrations.map(s=>`<tr>
+      <td><span class="tag tag-accent">${s.type}</span></td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.endpoint}</td>
+      <td>${s.enabled?'<span class="tag tag-green">Active</span>':'<span class="tag tag-gray">Disabled</span>'}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteSiem('${s.id}')">Delete</button></td>
+    </tr>`).join('')+'</tbody></table></div>'}`;
+}
+
 function renderSettings(){
   return`<div class="page-header"><h1>Settings</h1><p>Manage your account and API keys</p></div>
     <div style="display:grid;gap:10px">
@@ -441,6 +495,30 @@ function renderModal(){
       <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Generate</button>
     </form></div></div>`;
   }
+  if(S.modal==='webhook'){
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Add Webhook</h3><form onsubmit="event.preventDefault();const evts=[];document.querySelectorAll('.wh-evt:checked').forEach(c=>evts.push(c.value));addWebhook(document.getElementById('whu').value,document.getElementById('whf').value,evts)">
+      <div class="form-group"><label class="form-label">URL</label><input class="form-input" id="whu" type="url" placeholder="https://hooks.slack.com/services/..." required></div>
+      <div class="form-group"><label class="form-label">Format</label><select class="form-select" id="whf"><option value="slack">Slack</option><option value="discord">Discord</option><option value="json">JSON</option></select></div>
+      <div class="form-group"><label class="form-label">Events</label><div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-2)">
+        <label><input type="checkbox" class="wh-evt" value="anomaly.detected" checked> Anomaly detected</label>
+        <label><input type="checkbox" class="wh-evt" value="token.denied" checked> Token denied</label>
+        <label><input type="checkbox" class="wh-evt" value="agent.suspended"> Agent suspended</label>
+        <label><input type="checkbox" class="wh-evt" value="token.revoked"> Token revoked</label>
+        <label><input type="checkbox" class="wh-evt" value="connection.revoked"> Connection revoked</label>
+      </div></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Add Webhook</button>
+    </form></div></div>`;
+  }
+  if(S.modal==='siem'){
+    const type = S.siemType || 'datadog';
+    const labels = {datadog:'Datadog',splunk:'Splunk HEC',elastic:'Elasticsearch',syslog:'Syslog',webhook:'Webhook'};
+    const placeholders = {datadog:'https://http-intake.logs.datadoghq.com/v1/input',splunk:'https://your-splunk:8088/services/collector',elastic:'https://your-elastic:9200',syslog:'https://your-syslog-endpoint',webhook:'https://your-endpoint.com/events'};
+    return`<div class="modal-bg" onclick="if(event.target===this){S.modal=null;render()}"><div class="modal"><h3>Add ${labels[type]||type} Integration</h3><form onsubmit="event.preventDefault();addSiem('${type}',document.getElementById('se').value,document.getElementById('sk').value)">
+      <div class="form-group"><label class="form-label">Endpoint URL</label><input class="form-input" id="se" type="url" placeholder="${placeholders[type]||''}" required></div>
+      <div class="form-group"><label class="form-label">API Key (optional)</label><input class="form-input" id="sk" type="password" placeholder="Your ${labels[type]||''} API key"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px">Connect ${labels[type]||type}</button>
+    </form></div></div>`;
+  }
   return'';
 }
 
@@ -449,7 +527,7 @@ function render(){
   if(!S.user) S.user = DEMO.user;
   const alertCount=S.alerts?.unacknowledged||0;
   const pendingCount=S.approvals?.stats?.pending||0;
-  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,registry:renderRegistry,settings:renderSettings};
+  const pages={dashboard:renderDashboard,connections:renderConnections,tokens:renderTokens,audit:renderAudit,agents:renderAgents,policies:renderPolicies,registry:renderRegistry,webhooks:renderWebhooks,siem:renderSiem,settings:renderSettings};
   const content=(pages[S.page]||renderDashboard)();
   const initials=(S.user.name||S.user.email||'??').slice(0,2).toUpperCase();
 
@@ -464,6 +542,8 @@ function render(){
         ${navItem('🤖','Agents','agents')}
         ${navItem('📋','Policies','policies')}
         ${navItem('🛡️','MCP Registry','registry')}
+        ${navItem('🔔','Webhooks','webhooks')}
+        ${navItem('📡','SIEM','siem')}
         ${navItem('⚙️','Settings','settings')}
       </nav>
       ${S.demoMode?'<div style="padding:8px 12px;margin-bottom:8px"><div style="font-size:11px;color:var(--orange);background:var(--orange-bg);border:1px solid rgba(251,146,60,0.15);border-radius:6px;padding:6px 10px;text-align:center">Demo Mode</div></div>':''}
