@@ -1,0 +1,21 @@
+{
+  "name": "@keygate/cli",
+  "version": "0.1.0",
+  "description": "Keygate CLI — credential governance from your terminal",
+  "main": "dist/index.js",
+  "bin": {
+    "keygate": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  }
+}
